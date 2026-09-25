@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TabMax</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=3">
+  <link rel="shortcut icon" type="image/png" href="icons/icon-32.png?v=3">
+  <link rel="apple-touch-icon" href="icons/icon-128.png?v=3">
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/newtab.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- 1. Top Bar -->
+    <header class="top-bar">
+      <!-- Left: Weather Widget Pill -->
+      <div id="weather-widget" class="weather-widget" title="Click to change location in settings">
+        <span class="weather-icon">🌤️</span>
+        <span class="weather-temp">--°</span>
+        <span class="weather-location">Loading...</span>
+      </div>
+
+      <!-- Right: Action Buttons -->
+      <div class="top-actions">
+        <!-- Notes Shortcut Button -->
+        <button id="notes-shortcut-btn" class="action-btn" title="Open Notes (/notes)">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/>
+            <path d="M15 3v5h5"/>
+            <path d="M9 13h6"/>
+            <path d="M9 17h4"/>
+          </svg>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="settings-btn" class="action-btn" title="Settings">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle-btn" class="action-btn" title="Toggle Dark/Light Mode">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Minimalist Time & Date (No Card Background) -->
+    <section class="datetime-container">
+      <div id="time-display" class="time-display">--:-- --</div>
+      <div id="date-display" class="date-display">--------, -- ---- ----</div>
+    </section>
+
+    <!-- 3. Search Bar Container -->
+    <section class="search-wrapper">
+      <div class="search-container">
+        <svg class="icon search-icon" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.3-4.3"/>
+        </svg>
+
+        <span id="engine-badge" class="engine-badge">Search</span>
+
+        <input 
+          id="search-input" 
+          class="search-input" 
+          type="text" 
+          placeholder="Search the web, or type /bkm, /notes, /gh, /yt..." 
+          autocomplete="off" 
+          spellcheck="false"
+          autofocus
+        />
+
+        <div class="search-badges">
+          <span class="kbd-badge">⌘K</span>
+        </div>
+      </div>
+
+      <!-- Live /bkm Bookmark Fuzzy Search Dropdown -->
+      <div id="search-dropdown" class="search-dropdown"></div>
+    </section>
+
+    <!-- 4. Quick Bar (Bookmark Bar links wrapped in distinct background) -->
+    <nav id="quickbar-container" class="quickbar-container" aria-label="Quick Bar Bookmarks"></nav>
+
+    <!-- 5. Cards Grid (Subfolders of Other Bookmarks, min 2 max 4 columns) -->
+    <main id="cards-grid" class="cards-grid"></main>
+
+  </div>
+
+  <!-- Emoji Customization Modal -->
+  <div id="emoji-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="emoji-modal-title" class="modal-title">Customize Folder Emoji</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Type or pick any emoji:</label>
+          <input id="custom-emoji-input" class="form-input" type="text" maxlength="4" placeholder="📁" style="font-size: 1.5rem; text-align: center; width: 4.5rem; margin: 0 auto;"/>
+        </div>
+
+        <div class="form-group">
+          <span class="form-hint">Popular choices:</span>
+          <div class="emoji-grid">
+            <button class="emoji-choice-btn">📁</button>
+            <button class="emoji-choice-btn">🚀</button>
+            <button class="emoji-choice-btn">💻</button>
+            <button class="emoji-choice-btn">📚</button>
+            <button class="emoji-choice-btn">🎬</button>
+            <button class="emoji-choice-btn">💼</button>
+            <button class="emoji-choice-btn">🎨</button>
+            <button class="emoji-choice-btn">🎵</button>
+            <button class="emoji-choice-btn">🛠️</button>
+            <button class="emoji-choice-btn">💡</button>
+            <button class="emoji-choice-btn">🌐</button>
+            <button class="emoji-choice-btn">⚡</button>
+            <button class="emoji-choice-btn">☕</button>
+            <button class="emoji-choice-btn">🎮</button>
+            <button class="emoji-choice-btn">🔬</button>
+            <button class="emoji-choice-btn">📌</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
+          <button id="reset-emoji-btn" class="btn btn-secondary">Reset to Default</button>
+          <button id="save-emoji-btn" class="btn btn-primary">Save Icon</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">TabMax Settings</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 1. General Preferences -->
+        <div class="form-group-row">
+          <div class="toggle-info">
+            <label class="form-label" for="setting-open-newtab">Open bookmarks in new tab</label>
+            <span class="form-hint">Clicking any bookmark or favourite opens a new tab</span>
+          </div>
+          <label class="toggle-switch">
+            <input id="setting-open-newtab" type="checkbox"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid hsl(var(--border)); margin: 0.25rem 0;"/>
+
+        <!-- 2. Weather Settings (Separate Section) -->
+        <div class="form-group">
+          <div class="settings-section-header">
+            <label class="form-label" style="font-size: 0.92rem; font-weight: 600;">Weather Widget</label>
+            <span class="form-hint">Uses Open-Meteo API for accurate weather conditions.</span>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+            <div style="flex: 2;">
+              <input id="setting-weather-city" class="form-input" type="text" placeholder="e.g. New York, London, Tokyo" style="width: 100%;"/>
+            </div>
+            <div style="flex: 1;">
+              <select id="setting-weather-unit" class="form-select" style="width: 100%;">
+                <option value="celsius">Celsius (°C)</option>
+                <option value="fahrenheit">Fahrenheit (°F)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem;">
+            <span id="weather-status-msg" class="form-hint" style="color: hsl(var(--primary)); font-weight: 500;"></span>
+            <button id="update-weather-btn" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Update Weather</button>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid hsl(var(--border)); margin: 0.25rem 0;"/>
+
+        <!-- 3. Custom Search Engines -->
+        <div class="form-group">
+          <div class="settings-section-header">
+            <label class="form-label" style="font-size: 0.92rem; font-weight: 600;">Search Engines & Shortcuts</label>
+            <span class="form-hint">Type the prefix in search followed by your query (e.g. <code>/gh react</code>).</span>
+          </div>
+          <div id="custom-engines-list" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;"></div>
+
+          <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem;">
+            <input id="new-engine-prefix" class="form-input" style="width: 25%;" placeholder="/prefix"/>
+            <input id="new-engine-name" class="form-input" style="width: 30%;" placeholder="Name"/>
+            <input id="new-engine-url" class="form-input" style="width: 45%;" placeholder="URL (%s)"/>
+          </div>
+          <button id="add-engine-btn" class="btn btn-secondary" style="margin-top: 0.4rem; align-self: flex-start;">+ Add Shortcut</button>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
+          <button id="save-settings-btn" class="btn btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universal Bookmark & Folder Dialog Modal -->
+  <div id="bookmark-dialog-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="bookmark-dialog-title" class="modal-title">Edit Bookmark</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <form id="bookmark-dialog-form" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="dialog-item-title">Name</label>
+          <input id="dialog-item-title" class="form-input" type="text" placeholder="Title / Name" required autocomplete="off"/>
+        </div>
+
+        <div id="dialog-url-group" class="form-group">
+          <label class="form-label" for="dialog-item-url">URL</label>
+          <input id="dialog-item-url" class="form-input" type="text" placeholder="https://example.com" autocomplete="off"/>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
+          <button type="button" id="dialog-cancel-btn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="dialog-submit-btn" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="scripts/newtab.js"></script>
+</body>
+</html>

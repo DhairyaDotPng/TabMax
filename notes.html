@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TabMax - Notes</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png?v=3">
+  <link rel="shortcut icon" type="image/png" href="icons/icon-32.png?v=3">
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/notes.css">
+</head>
+<body>
+  <div class="notes-container">
+
+    <!-- Notes Header -->
+    <header class="notes-header">
+      <!-- Back Button -->
+      <a href="newtab.html" class="back-btn" title="Back to TabMax (or press Esc)">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>Back to TabMax</span>
+      </a>
+
+      <!-- Notes Search -->
+      <div class="notes-search-wrapper">
+        <input id="notes-search-input" class="notes-search-input" type="text" placeholder="Search notes..."/>
+      </div>
+
+      <!-- Header Actions -->
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <span id="sync-status" style="font-size: 0.78rem; color: hsl(var(--muted-foreground));"></span>
+        <button id="sync-dir-btn" class="back-btn" title="Choose a local directory on your PC to auto-save notes as .md files">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+          </svg>
+          <span>Sync Folder</span>
+        </button>
+
+        <button id="theme-toggle-btn" class="back-btn" style="padding: 0.45rem;" title="Toggle Theme">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Google Keep Style Note Creator -->
+    <div class="note-creator-wrapper">
+      <div id="note-creator" class="note-creator">
+        <input id="creator-title" class="creator-title-input" type="text" placeholder="Title"/>
+        <textarea id="creator-body" class="creator-body-input" placeholder="Take a note... (supports Markdown)"></textarea>
+        <div class="creator-actions">
+          <span style="font-size: 0.75rem; color: hsl(var(--muted-foreground));">Tip: Supports Markdown syntax</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="creator-close-btn" class="btn btn-secondary">Cancel</button>
+            <button id="creator-save-btn" class="btn btn-primary">Save Note</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pinned Notes Section -->
+    <section id="pinned-section" style="display: none;">
+      <h3 class="section-heading">Pinned</h3>
+      <div id="pinned-notes-grid" class="notes-grid"></div>
+    </section>
+
+    <!-- Other Notes Section -->
+    <section>
+      <h3 class="section-heading">All Notes</h3>
+      <div id="other-notes-grid" class="notes-grid"></div>
+    </section>
+
+  </div>
+
+  <!-- Note Split View Editor (65% Editor, 35% Markdown Guide) -->
+  <div id="editor-overlay" class="editor-overlay">
+    <div class="editor-container">
+
+      <!-- Left Side: 65% Editor & Live Preview -->
+      <div class="editor-left">
+        <div class="editor-header">
+          <button id="editor-back-btn" class="back-btn" style="padding: 0.35rem 0.75rem; font-size: 0.82rem; flex-shrink: 0;" title="Back to Notes (or press Esc)">
+            <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            <span>Notes</span>
+          </button>
+          <input id="editor-title" class="editor-title-input" type="text" placeholder="Note Title"/>
+
+          <div class="editor-controls">
+            <!-- Edit / Preview Switch -->
+            <div class="tab-switch">
+              <button id="editor-tab-edit" class="tab-switch-btn active">Write</button>
+              <button id="editor-tab-prev" class="tab-switch-btn">Preview</button>
+            </div>
+
+            <!-- Pin Button -->
+            <button id="editor-pin-btn" class="card-icon-btn" title="Pin / Unpin">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Markdown Textarea -->
+        <textarea id="editor-textarea" class="editor-textarea" placeholder="Start typing markdown..."></textarea>
+
+        <!-- Markdown Rendered Preview -->
+        <div id="editor-preview" class="editor-preview"></div>
+
+        <!-- Editor Footer -->
+        <div class="editor-footer">
+          <button id="editor-delete-btn" class="btn btn-destructive">Delete</button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="editor-done-btn" class="btn btn-primary">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side: 35% Markdown Guide Cheat-Sheet (Scrollable with Extensive Guides) -->
+      <div class="editor-right">
+        <div class="guide-header-sticky">
+          <div class="guide-title">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10M6 10h10"/>
+            </svg>
+            <span>Markdown Cheat-Sheet</span>
+          </div>
+          <span style="font-size: 0.74rem; color: hsl(var(--muted-foreground));">Click any card to insert snippet at your cursor:</span>
+        </div>
+
+        <div class="guide-grid">
+          <!-- 1. HEADINGS -->
+          <div class="guide-section-label">📌 Headings</div>
+
+          <div class="guide-card" data-snippet="# Heading 1\n">
+            <div class="guide-card-header">
+              <span>Heading 1</span>
+              <code class="guide-syntax"># Title</code>
+            </div>
+            <span class="guide-preview-hint">Large primary page heading</span>
+          </div>
+
+          <div class="guide-card" data-snippet="## Heading 2\n">
+            <div class="guide-card-header">
+              <span>Heading 2</span>
+              <code class="guide-syntax">## Section</code>
+            </div>
+            <span class="guide-preview-hint">Major section title</span>
+          </div>
+
+          <div class="guide-card" data-snippet="### Heading 3\n">
+            <div class="guide-card-header">
+              <span>Heading 3</span>
+              <code class="guide-syntax">### Subsection</code>
+            </div>
+            <span class="guide-preview-hint">Subsection title</span>
+          </div>
+
+          <div class="guide-card" data-snippet="#### Heading 4\n">
+            <div class="guide-card-header">
+              <span>Heading 4</span>
+              <code class="guide-syntax">#### Small Title</code>
+            </div>
+            <span class="guide-preview-hint">Minor paragraph header</span>
+          </div>
+
+          <div class="guide-card" data-snippet="\n---\n">
+            <div class="guide-card-header">
+              <span>Horizontal Divider</span>
+              <code class="guide-syntax">---</code>
+            </div>
+            <span class="guide-preview-hint">Full-width section separator rule</span>
+          </div>
+
+          <!-- 2. TEXT FORMATTING -->
+          <div class="guide-section-label">✍️ Text Formatting</div>
+
+          <div class="guide-card" data-snippet="**Bold Text**">
+            <div class="guide-card-header">
+              <span>Bold</span>
+              <code class="guide-syntax">**bold text**</code>
+            </div>
+            <span class="guide-preview-hint">Strong emphasis</span>
+          </div>
+
+          <div class="guide-card" data-snippet="*Italic Text*">
+            <div class="guide-card-header">
+              <span>Italic</span>
+              <code class="guide-syntax">*italic text*</code>
+            </div>
+            <span class="guide-preview-hint">Subtle emphasis</span>
+          </div>
+
+          <div class="guide-card" data-snippet="***Bold & Italic***">
+            <div class="guide-card-header">
+              <span>Bold & Italic</span>
+              <code class="guide-syntax">***bold italic***</code>
+            </div>
+            <span class="guide-preview-hint">Combined strong italic emphasis</span>
+          </div>
+
+          <div class="guide-card" data-snippet="~~Strikethrough~~">
+            <div class="guide-card-header">
+              <span>Strikethrough</span>
+              <code class="guide-syntax">~~crossed out~~</code>
+            </div>
+            <span class="guide-preview-hint">Crossed out or cancelled text</span>
+          </div>
+
+          <div class="guide-card" data-snippet="==Highlighted Text==">
+            <div class="guide-card-header">
+              <span>Highlight Mark</span>
+              <code class="guide-syntax">==highlighted==</code>
+            </div>
+            <span class="guide-preview-hint">Yellow background marker highlight</span>
+          </div>
+
+          <div class="guide-card" data-snippet="`inline_code()`">
+            <div class="guide-card-header">
+              <span>Inline Code</span>
+              <code class="guide-syntax">`code`</code>
+            </div>
+            <span class="guide-preview-hint">Keywords, variables, commands</span>
+          </div>
+
+          <!-- 3. LISTS & TASKS -->
+          <div class="guide-section-label">📋 Lists & Tasks</div>
+
+          <div class="guide-card" data-snippet="- [ ] Todo item\n">
+            <div class="guide-card-header">
+              <span>Task (Pending)</span>
+              <code class="guide-syntax">- [ ] Task name</code>
+            </div>
+            <span class="guide-preview-hint">Interactive todo checkbox</span>
+          </div>
+
+          <div class="guide-card" data-snippet="- [x] Completed item\n">
+            <div class="guide-card-header">
+              <span>Task (Completed)</span>
+              <code class="guide-syntax">- [x] Done item</code>
+            </div>
+            <span class="guide-preview-hint">Completed checkbox with strikethrough</span>
+          </div>
+
+          <div class="guide-card" data-snippet="- First point\n- Second point\n- Third point\n">
+            <div class="guide-card-header">
+              <span>Bullet List</span>
+              <code class="guide-syntax">- Item 1\n- Item 2</code>
+            </div>
+            <span class="guide-preview-hint">Unordered bullet points</span>
+          </div>
+
+          <div class="guide-card" data-snippet="1. Step one\n2. Step two\n3. Step three\n">
+            <div class="guide-card-header">
+              <span>Numbered List</span>
+              <code class="guide-syntax">1. Step\n2. Step</code>
+            </div>
+            <span class="guide-preview-hint">Sequential numbered steps</span>
+          </div>
+
+          <div class="guide-card" data-snippet="- Main parent item\n  - Sub-item A\n  - Sub-item B\n">
+            <div class="guide-card-header">
+              <span>Nested List</span>
+              <code class="guide-syntax">- Parent\n  - Child</code>
+            </div>
+            <span class="guide-preview-hint">Hierarchical indented list</span>
+          </div>
+
+          <!-- 4. CODE BLOCKS -->
+          <div class="guide-section-label">💻 Code Blocks</div>
+
+          <div class="guide-card" data-snippet="```javascript\nfunction helloWorld() {\n  console.log('Hello from TabMax!');\n}\n```\n">
+            <div class="guide-card-header">
+              <span>JavaScript Code</span>
+              <code class="guide-syntax">```javascript ... ```</code>
+            </div>
+            <span class="guide-preview-hint">JS function and syntax block</span>
+          </div>
+
+          <div class="guide-card" data-snippet="```python\ndef calculate_total(items):\n    return sum(item.price for item in items)\n```\n">
+            <div class="guide-card-header">
+              <span>Python Code</span>
+              <code class="guide-syntax">```python ... ```</code>
+            </div>
+            <span class="guide-preview-hint">Python function snippet</span>
+          </div>
+
+          <div class="guide-card" data-snippet="```bash\n# Install and run\ngit clone repo_url\ncd project\n```\n">
+            <div class="guide-card-header">
+              <span>Terminal / Bash</span>
+              <code class="guide-syntax">```bash ... ```</code>
+            </div>
+            <span class="guide-preview-hint">Shell commands and scripts</span>
+          </div>
+
+          <div class="guide-card" data-snippet="```html\n<div class=\"card\">\n  <h3>Card Title</h3>\n</div>\n```\n">
+            <div class="guide-card-header">
+              <span>HTML / Markup</span>
+              <code class="guide-syntax">```html ... ```</code>
+            </div>
+            <span class="guide-preview-hint">HTML template code</span>
+          </div>
+
+          <div class="guide-card" data-snippet="```json\n{\n  \"name\": \"TabMax\",\n  \"version\": \"1.0.0\"\n}\n```\n">
+            <div class="guide-card-header">
+              <span>JSON Data</span>
+              <code class="guide-syntax">```json ... ```</code>
+            </div>
+            <span class="guide-preview-hint">Key-value JSON config</span>
+          </div>
+
+          <!-- 5. QUOTES & CALLOUTS -->
+          <div class="guide-section-label">💬 Quotes & Callouts</div>
+
+          <div class="guide-card" data-snippet="> The best way to predict the future is to create it.\n">
+            <div class="guide-card-header">
+              <span>Blockquote</span>
+              <code class="guide-syntax">&gt; Quote text</code>
+            </div>
+            <span class="guide-preview-hint">Indented quote with accent border</span>
+          </div>
+
+          <div class="guide-card" data-snippet="> Outer quote\n>> Nested inside quote\n">
+            <div class="guide-card-header">
+              <span>Nested Quote</span>
+              <code class="guide-syntax">&gt; First\n&gt;&gt; Second</code>
+            </div>
+            <span class="guide-preview-hint">Multi-level discussion quotes</span>
+          </div>
+
+          <div class="guide-card" data-snippet="> **Note:** Remember to backup your local notes regularly.\n">
+            <div class="guide-card-header">
+              <span>Callout Note</span>
+              <code class="guide-syntax">&gt; **Note:** ...</code>
+            </div>
+            <span class="guide-preview-hint">Highlighted informational tip</span>
+          </div>
+
+          <!-- 6. LINKS & MEDIA -->
+          <div class="guide-section-label">🔗 Links & Media</div>
+
+          <div class="guide-card" data-snippet="[Visit GitHub](https://github.com)">
+            <div class="guide-card-header">
+              <span>Hyperlink</span>
+              <code class="guide-syntax">[Title](https://...)</code>
+            </div>
+            <span class="guide-preview-hint">Clickable external link</span>
+          </div>
+
+          <div class="guide-card" data-snippet="![Alt Description](https://images.unsplash.com/photo-1518770660439-4636190af475?w=500)">
+            <div class="guide-card-header">
+              <span>Image</span>
+              <code class="guide-syntax">![Alt](image_url)</code>
+            </div>
+            <span class="guide-preview-hint">Embedded inline image</span>
+          </div>
+
+          <div class="guide-card" data-snippet="[Email Support](mailto:support@example.com)">
+            <div class="guide-card-header">
+              <span>Email Link</span>
+              <code class="guide-syntax">[Email](mailto:...)</code>
+            </div>
+            <span class="guide-preview-hint">Opens default mail client</span>
+          </div>
+
+          <!-- 7. TABLES & GRID DATA -->
+          <div class="guide-section-label">📊 Tables & Data</div>
+
+          <div class="guide-card" data-snippet="| Feature | Status | Notes |\n| --- | --- | --- |\n| Bookmarks | Done | Fast and local |\n| Weather | Done | Open-Meteo API |\n| Notes | Done | Markdown support |\n">
+            <div class="guide-card-header">
+              <span>Simple Table</span>
+              <code class="guide-syntax">| Col 1 | Col 2 |</code>
+            </div>
+            <span class="guide-preview-hint">Clean formatted data table</span>
+          </div>
+
+          <div class="guide-card" data-snippet="| Left-Aligned | Centered | Right-Aligned |\n| :--- | :---: | ---: |\n| Text Left | Text Center | $100.00 |\n| Alpha | Beta | $250.00 |\n">
+            <div class="guide-card-header">
+              <span>Aligned Table</span>
+              <code class="guide-syntax">| :-- | :-: | --: |</code>
+            </div>
+            <span class="guide-preview-hint">Table with column text alignment</span>
+          </div>
+
+          <!-- 8. ADVANCED SNIPPETS -->
+          <div class="guide-section-label">⚡ Advanced Elements</div>
+
+          <div class="guide-card" data-snippet="Here is a key fact[^1].\n\n[^1]: Here is the reference source.">
+            <div class="guide-card-header">
+              <span>Footnote</span>
+              <code class="guide-syntax">Fact[^1] ... [^1]: Source</code>
+            </div>
+            <span class="guide-preview-hint">Citations and reference notes</span>
+          </div>
+
+          <div class="guide-card" data-snippet="**Keyboard Shortcut:** `<kbd>Ctrl</kbd> + <kbd>K</kbd>`">
+            <div class="guide-card-header">
+              <span>Keyboard Key Badge</span>
+              <code class="guide-syntax">&lt;kbd&gt;Key&lt;/kbd&gt;</code>
+            </div>
+            <span class="guide-preview-hint">Visual hotkey representation</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="scripts/notes.js"></script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+/* Notes Page Styles */
+.notes-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Notes Header */
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  color: hsl(var(--foreground));
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.back-btn:hover {
+  background-color: hsl(var(--accent));
+  transform: translateX(-2px);
+}
+.notes-search-wrapper {
+  max-width: 480px;
+  width: 100%;
+}
+.notes-search-input {
+  width: 100%;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-full);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: hsl(var(--foreground));
+  outline: none;
+  transition: all 0.15s ease;
+}
+.notes-search-input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
+}
+
+/* Quick Note Creator (Google Keep Style) */
+.note-creator-wrapper {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+.note-creator {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s ease;
+}
+.note-creator:focus-within {
+  box-shadow: var(--shadow-elevated);
+}
+.creator-title-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  display: none;
+}
+.creator-body-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.92rem;
+  color: hsl(var(--foreground));
+  resize: none;
+  min-height: 2.2rem;
+  font-family: inherit;
+}
+.note-creator.expanded .creator-title-input {
+  display: block;
+}
+.note-creator.expanded .creator-body-input {
+  min-height: 5rem;
+}
+.creator-actions {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+.note-creator.expanded .creator-actions {
+  display: flex;
+}
+
+/* Notes Grid (Google Keep Style) */
+.section-heading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+}
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.note-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 140px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.note-card:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--border));
+  box-shadow: var(--shadow-card);
+}
+.note-card-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.35rem;
+}
+.note-card-body {
+  font-size: 0.88rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+.note-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+.note-card-actions {
+  display: flex;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.note-card:hover .note-card-actions {
+  opacity: 1;
+}
+.card-icon-btn {
+  background: transparent;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+}
+.card-icon-btn:hover {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--muted));
+}
+.pin-badge {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  color: hsl(var(--primary));
+}
+
+/* Note Editor Split View (65% Editor, 35% Markdown Guide) */
+.editor-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.editor-overlay.active {
+  display: flex;
+}
+.editor-container {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-elevated);
+  width: 95vw;
+  max-width: 1300px;
+  height: 88vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left: 65% Editor & Live Preview */
+.editor-left {
+  flex: 65;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid hsl(var(--border));
+  padding: 1.5rem;
+  gap: 1rem;
+  overflow-y: auto;
+}
+.editor-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.editor-title-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  outline: none;
+  letter-spacing: -0.02em;
+}
+.editor-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tab-switch {
+  display: inline-flex;
+  background: hsl(var(--muted));
+  padding: 0.2rem;
+  border-radius: var(--radius-full);
+  gap: 0.2rem;
+}
+.tab-switch-btn {
+  border: none;
+  background: transparent;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+.tab-switch-btn.active {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: var(--shadow-subtle);
+}
+.editor-textarea {
+  width: 100%;
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+}
+.editor-preview {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  line-height: 1.6;
+  display: none;
+}
+.editor-preview.active {
+  display: block;
+}
+.editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Right: 35% Markdown Guide / Cheat-sheet (Scrollable) */
+.editor-right {
+  flex: 35;
+  background-color: hsl(var(--muted) / 0.25);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  max-height: 100%;
+  scrollbar-gutter: stable;
+}
+.guide-header-sticky {
+  position: sticky;
+  top: -1.25rem;
+  background-color: hsl(var(--card));
+  margin: -1.25rem -1.25rem 0.5rem -1.25rem;
+  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.guide-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: hsl(var(--foreground));
+}
+.guide-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.guide-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.guide-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.guide-card:hover {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--accent) / 0.5);
+  transform: translateX(2px);
+}
+.guide-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+.guide-syntax {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  color: hsl(var(--primary));
+  background: hsl(var(--muted));
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.guide-preview-hint {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+}
+
+/* Rendered Markdown Element Styles */
+.md-h1 { font-size: 1.5rem; font-weight: 700; margin: 0.6rem 0 0.3rem; letter-spacing: -0.02em; }
+.md-h2 { font-size: 1.25rem; font-weight: 600; margin: 0.5rem 0 0.25rem; letter-spacing: -0.01em; }
+.md-h3 { font-size: 1.1rem; font-weight: 600; margin: 0.4rem 0 0.2rem; }
+.md-h4 { font-size: 0.98rem; font-weight: 600; margin: 0.35rem 0 0.15rem; }
+.md-h5 { font-size: 0.9rem; font-weight: 600; margin: 0.3rem 0 0.15rem; color: hsl(var(--muted-foreground)); }
+.md-h6 { font-size: 0.85rem; font-weight: 600; margin: 0.25rem 0 0.15rem; color: hsl(var(--muted-foreground)); }
+.md-hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1rem 0;
+}
+.md-code-wrapper {
+  position: relative;
+  margin: 0.6rem 0;
+}
+.md-code-lang {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.5rem;
+  font-size: 0.68rem;
+  font-family: monospace;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+}
+.md-code-block {
+  background: hsl(var(--muted));
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+.md-inline-code {
+  background: hsl(var(--muted));
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--radius-sm);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--border) / 0.4);
+}
+.md-blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  margin: 0.6rem 0;
+  font-style: italic;
+  background: hsl(var(--muted) / 0.2);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.md-nested-quote {
+  border-left-color: hsl(var(--muted-foreground));
+  margin-left: 0.75rem;
+}
+.md-li { margin-left: 1.25rem; list-style: disc; margin-bottom: 0.15rem; }
+.md-ol-li { margin-left: 1.25rem; list-style: decimal; margin-bottom: 0.15rem; }
+.md-task-item { display: flex; align-items: center; gap: 0.45rem; margin: 0.25rem 0; }
+.md-task-done { text-decoration: line-through; opacity: 0.55; }
+.md-link { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+.md-highlight {
+  background-color: hsl(45 90% 70% / 0.35);
+  color: hsl(var(--foreground));
+  padding: 0.1rem 0.25rem;
+  border-radius: 2px;
+}
+.md-img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: 0.5rem 0;
+  border: 1px solid hsl(var(--border));
+}
+.md-table-wrap {
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.md-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  border: 1px solid hsl(var(--border));
+}
+.md-table th, .md-table td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+}
+.md-table th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+}
+.md-table tr:nth-child(even) td {
+  background-color: hsl(var(--muted) / 0.25);
+}
