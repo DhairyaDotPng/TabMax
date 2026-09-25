@@ -132,7 +132,7 @@ TabMax/
 
 ## 📜 Credits & Acknowledgements
 
-- Inspired by and created as a modern fork/evolution of the minimalist [Humble New Tab Page](https://github.com/hahn/humble-new-tab).
+- Inspired by and created as a modern fork/evolution of the minimalist [Humble New Tab Page](https://github.com/ibillingsley/HumbleNewTabPage).
 - Designed following [shadcn/ui](https://ui.shadcn.com/) monochrome design aesthetics.
 - Weather data provided freely by [Open-Meteo](https://open-meteo.com/).
 - Typography powered by [Inter](https://rsms.me/inter/).
