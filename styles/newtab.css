@@ -328,6 +328,12 @@
   opacity: 0.45;
   transform: scale(0.98);
 }
+.bookmark-card.dragging,
+.bookmark-card.dragging .card-header,
+body.is-dragging-card,
+body.is-dragging-card * {
+  cursor: grabbing !important;
+}
 .bookmark-card.drag-over {
   border: 2px dashed hsl(var(--primary));
   transform: scale(1.01);
@@ -342,10 +348,7 @@
   border-bottom: 1px solid hsl(var(--border) / 0.6);
   user-select: none;
   background-color: hsl(var(--card));
-  cursor: grab;
-}
-.card-header:active {
-  cursor: grabbing;
+  cursor: default;
 }
 .card-title-group {
   display: flex;
@@ -394,10 +397,44 @@
   padding: 0.1rem 0.45rem;
   border-radius: var(--radius-full);
 }
-.drag-handle {
-  color: hsl(var(--muted-foreground) / 0.5);
-  width: 1rem;
-  height: 1rem;
+.card-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.card-collapse-btn:hover {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--muted));
+}
+.card-collapse-btn .chevron-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  stroke: currentColor;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bookmark-card.collapsed .card-collapse-btn .chevron-icon {
+  transform: rotate(-90deg);
+}
+
+/* Collapsed Folder State */
+.bookmark-card.collapsed {
+  box-shadow: var(--shadow-subtle);
+}
+.bookmark-card.collapsed .card-header {
+  border-bottom: 1px solid transparent;
+}
+.bookmark-card.collapsed .card-body {
+  display: none;
 }
 
 /* Card Bookmarks List with Max Height */

@@ -58,9 +58,29 @@ export function openEmojiPicker(folderId, folderTitle, onSaveCallback) {
   titleEl.textContent = `Icon for "${folderTitle}"`;
   inputEl.value = getSavedEmoji(folderId);
 
+  // Enforce strictly 1 emoji at all times
+  inputEl.oninput = () => {
+    const val = inputEl.value.trim();
+    if (!val) {
+      inputEl.value = '';
+      return;
+    }
+    try {
+      const segmenter = new Intl.Segmenter();
+      const segments = Array.from(segmenter.segment(val));
+      if (segments.length > 0) {
+        inputEl.value = segments[segments.length - 1].segment;
+      }
+    } catch (e) {
+      const chars = Array.from(val);
+      inputEl.value = chars.slice(-1).join('');
+    }
+  };
+
   choices.forEach(btn => {
     btn.onclick = () => {
-      inputEl.value = btn.textContent;
+      inputEl.value = btn.textContent.trim();
+      inputEl.focus();
     };
   });
 
@@ -78,6 +98,10 @@ export function openEmojiPicker(folderId, folderTitle, onSaveCallback) {
   };
 
   openModal(modal);
+  setTimeout(() => {
+    inputEl.focus();
+    inputEl.select();
+  }, 50);
 }
 
 // Settings Modal Setup

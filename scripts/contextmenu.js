@@ -141,6 +141,17 @@ function buildContextMenuItems(target) {
     const folderId = card.dataset.folderId;
     const folderTitle = card.dataset.folderTitle;
 
+    const isCollapsed = card.classList.contains('collapsed');
+    items.push({
+      label: isCollapsed ? 'Expand Folder' : 'Collapse Folder',
+      icon: isCollapsed
+        ? `<svg class="icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        : `<svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      action: () => {
+        const collapseBtn = card.querySelector('.card-collapse-btn');
+        if (collapseBtn) collapseBtn.click();
+      }
+    });
     items.push({
       label: 'New Bookmark in Folder',
       icon: `<svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>`,

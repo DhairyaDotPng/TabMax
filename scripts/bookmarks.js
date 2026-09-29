@@ -132,6 +132,30 @@ export function saveCardsOrder(orderArray) {
   localStorage.setItem('tabmax_cards_order', JSON.stringify(orderArray));
 }
 
+export function getCollapsedFolders() {
+  try {
+    const raw = localStorage.getItem('tabmax_collapsed_folders');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function toggleFolderCollapsed(folderId) {
+  const collapsed = getCollapsedFolders();
+  const index = collapsed.indexOf(folderId);
+  let isNowCollapsed = false;
+  if (index === -1) {
+    collapsed.push(folderId);
+    isNowCollapsed = true;
+  } else {
+    collapsed.splice(index, 1);
+    isNowCollapsed = false;
+  }
+  localStorage.setItem('tabmax_collapsed_folders', JSON.stringify(collapsed));
+  return isNowCollapsed;
+}
+
 export function getRootIds() {
   return {
     bookmarkBarId: rootBookmarkBarId,
@@ -261,15 +285,23 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
     const titleGroup = document.createElement('div');
     titleGroup.className = 'card-title-group';
 
+    // Check if card is previously collapsed
+    const isCollapsed = getCollapsedFolders().includes(card.id);
+    if (isCollapsed) {
+      cardEl.classList.add('collapsed');
+    }
+
     // Emoji button
     const emojiBtn = document.createElement('button');
     emojiBtn.className = 'card-emoji-btn';
     emojiBtn.title = 'Click to customize folder emoji';
     emojiBtn.textContent = getSavedEmoji(card.id);
+    emojiBtn.draggable = false;
     emojiBtn.onclick = (e) => {
       e.stopPropagation();
       if (onEmojiClick) onEmojiClick(card.id, card.title);
     };
+    emojiBtn.addEventListener('mousedown', (e) => e.stopPropagation());
 
     const title = document.createElement('h3');
     title.className = 'card-title';
@@ -279,7 +311,7 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
     titleGroup.appendChild(emojiBtn);
     titleGroup.appendChild(title);
 
-    // Meta (Count + Drag icon)
+    // Meta (Count + Collapse Chevron Button)
     const meta = document.createElement('div');
     meta.className = 'card-meta';
 
@@ -287,20 +319,28 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
     count.className = 'card-count';
     count.textContent = card.bookmarks.length;
 
-    const dragHandle = document.createElement('div');
-    dragHandle.className = 'drag-handle';
-    dragHandle.innerHTML = `
-      <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
-        <circle cx="9" cy="6" r="1.5" fill="currentColor"/>
-        <circle cx="15" cy="6" r="1.5" fill="currentColor"/>
-        <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
-        <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
-        <circle cx="9" cy="18" r="1.5" fill="currentColor"/>
-        <circle cx="15" cy="18" r="1.5" fill="currentColor"/>
+    const collapseBtn = document.createElement('button');
+    collapseBtn.className = 'card-collapse-btn';
+    collapseBtn.type = 'button';
+    collapseBtn.draggable = false;
+    collapseBtn.title = isCollapsed ? 'Expand folder' : 'Collapse folder';
+    collapseBtn.setAttribute('aria-label', isCollapsed ? 'Expand folder' : 'Collapse folder');
+    collapseBtn.innerHTML = `
+      <svg class="chevron-icon" viewBox="0 0 24 24" width="16" height="16">
+        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`;
 
+    collapseBtn.onclick = (e) => {
+      e.stopPropagation();
+      const nowCollapsed = toggleFolderCollapsed(card.id);
+      cardEl.classList.toggle('collapsed', nowCollapsed);
+      collapseBtn.title = nowCollapsed ? 'Expand folder' : 'Collapse folder';
+      collapseBtn.setAttribute('aria-label', nowCollapsed ? 'Expand folder' : 'Collapse folder');
+    };
+    collapseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+
     meta.appendChild(count);
-    meta.appendChild(dragHandle);
+    meta.appendChild(collapseBtn);
 
     header.appendChild(titleGroup);
     header.appendChild(meta);
@@ -379,6 +419,7 @@ function setupCardDragDrop(cardEl, gridEl) {
   cardEl.addEventListener('dragstart', (e) => {
     draggedCard = cardEl;
     cardEl.classList.add('dragging');
+    document.body.classList.add('is-dragging-card');
     e.dataTransfer.effectAllowed = 'move';
   });
 
@@ -387,6 +428,7 @@ function setupCardDragDrop(cardEl, gridEl) {
       draggedCard.classList.remove('dragging');
       draggedCard = null;
     }
+    document.body.classList.remove('is-dragging-card');
     document.querySelectorAll('.bookmark-card').forEach(c => c.classList.remove('drag-over'));
     
     // Save current cards order in DOM
