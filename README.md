@@ -20,15 +20,25 @@
 
 ## ✨ Features
 
-- 🎨 **Shadcn Monochrome Design**: Clean zinc/neutral dark and light themes with pure CSS variables, crisp borders, and subtle elevation.
+- 🎨 **Shadcn Monochrome Design**: Clean zinc/neutral dark and light themes with pure CSS variables, crisp borders, subtle elevation, and transparent PNG branding.
 - ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme toggle, and live weather widget powered by Open-Meteo API.
 - 📌 **Auto-Wrapping Quick Bar**: Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar. Automatically wraps across multiple rows.
-- 📂 **Organized Folder Cards**: Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards with scrollable lists, custom emoji pickers, and drag-and-drop reordering.
-- 🖱️ **Full Browser Bookmark Management**:
+- 📂 **Organized & Collapsible Folder Cards**:
+  - Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards with scrollable lists.
+  - **Collapse & Expand**: Folders can be collapsed into compact headers via an interactive chevron button or right-click menu, with state saved across sessions.
+  - **Card Drag-and-Drop**: Easily reorder folder cards across your grid using the titlebar as a drag handle.
+  - **Custom Emojis**: Set custom single-emoji folder icons using the quick picker with strict 1-emoji Unicode validation (`Intl.Segmenter`).
+- ↕️ **In-Folder Drag-and-Drop Bookmark Reordering**:
+  - Reorder bookmarks directly within each folder card using a dedicated 6-dot drag handle on the right corner of each bookmark link.
+  - Features real-time drop position indicators and instantly syncs the new order with Chrome's native bookmark hierarchy via `chrome.bookmarks.move`.
+- 🖱️ **Full Browser Bookmark Management (Context Menu)**:
   - Right-click anywhere on the background to create a new folder.
-  - Right-click a folder card to rename it or add a bookmark inside.
-  - Right-click any bookmark or quick-bar pill to edit its name or URL, or delete it.
-  - Changes instantly sync bidirectionally with Chrome's native bookmark database.
+  - Right-click a folder card to rename it, collapse/expand it, change its emoji, or add a bookmark inside.
+  - Right-click any bookmark or quick-bar pill to edit its name or URL, copy URL, or delete it.
+  - All changes sync bidirectionally in real-time with Chrome's native bookmark database.
+- ⚙️ **Decoupled Preferences & Open in New Tab Toggle**:
+  - Instant auto-saving toggle to choose whether clicking bookmarks opens in a new tab or the same tab.
+  - Decoupled weather controls with dedicated "Update Weather" validation and zero network lag on general preference saves.
 - 🔍 **Instant Search & Shortcuts**:
   - `Ctrl + K` to immediately focus the search bar.
   - `/bkm <query>`: Live fuzzy bookmark search with arrow-key navigation and instant Enter to open.
