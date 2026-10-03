@@ -3,6 +3,12 @@
 let allBookmarksCache = [];
 let rootBookmarkBarId = '1';
 let rootOtherBookmarksId = '2';
+let draggedBookmark = null;
+let isInternalMove = false;
+
+export function isInternalBookmarkMoving() {
+  return isInternalMove;
+}
 
 export async function loadBookmarks() {
   if (!chrome.bookmarks) {
@@ -215,6 +221,23 @@ export async function deleteBookmark(bookmarkId) {
   return await chrome.bookmarks.remove(bookmarkId);
 }
 
+export async function moveBookmark(bookmarkId, folderId, newIndex) {
+  if (!chrome.bookmarks) return;
+  isInternalMove = true;
+  try {
+    await chrome.bookmarks.move(bookmarkId, {
+      parentId: folderId,
+      index: newIndex
+    });
+  } catch (err) {
+    console.error('Failed to move bookmark in Chrome:', err);
+  } finally {
+    setTimeout(() => {
+      isInternalMove = false;
+    }, 250);
+  }
+}
+
 export function shouldOpenInNewTab() {
   return localStorage.getItem('tabmax_open_new_tab') === 'true';
 }
@@ -374,11 +397,29 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
 
         const icon = createFaviconElement(bkm.url, bkm.title);
         const span = document.createElement('span');
+        span.className = 'bookmark-title';
         span.textContent = bkm.title || bkm.url;
+
+        // Bookmark Drag Handle on the right corner
+        const dragHandle = document.createElement('span');
+        dragHandle.className = 'bookmark-drag-handle';
+        dragHandle.title = 'Drag to reorder bookmark';
+        dragHandle.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+            <circle cx="9" cy="6" r="1.5" fill="currentColor"/>
+            <circle cx="15" cy="6" r="1.5" fill="currentColor"/>
+            <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+            <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+            <circle cx="9" cy="18" r="1.5" fill="currentColor"/>
+            <circle cx="15" cy="18" r="1.5" fill="currentColor"/>
+          </svg>`;
 
         link.appendChild(icon);
         link.appendChild(span);
+        link.appendChild(dragHandle);
         body.appendChild(link);
+
+        setupBookmarkDragDrop(link, dragHandle, body);
       }
     }
 
@@ -412,11 +453,96 @@ function createFaviconElement(url, title) {
   return img;
 }
 
+// Drag & Drop Bookmark Reordering within Folder
+function setupBookmarkDragDrop(link, dragHandle, cardBody) {
+  // Prevent clicking drag handle from opening the bookmark link
+  dragHandle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  // Only enable dragging on the link when cursor hovers over the drag handle
+  dragHandle.addEventListener('mouseenter', () => {
+    link.draggable = true;
+  });
+
+  dragHandle.addEventListener('mouseleave', () => {
+    if (draggedBookmark !== link) {
+      link.draggable = false;
+    }
+  });
+
+  link.addEventListener('dragstart', (e) => {
+    e.stopPropagation();
+    draggedBookmark = link;
+    link.classList.add('dragging-bookmark');
+    document.body.classList.add('is-dragging-bookmark');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', link.dataset.id);
+  });
+
+  link.addEventListener('dragend', () => {
+    link.draggable = false;
+    link.classList.remove('dragging-bookmark');
+    document.body.classList.remove('is-dragging-bookmark');
+    document.querySelectorAll('.bookmark-link').forEach(el => {
+      el.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+    draggedBookmark = null;
+  });
+
+  link.addEventListener('dragover', (e) => {
+    if (!draggedBookmark || draggedBookmark === link) return;
+    if (draggedBookmark.dataset.folderId !== link.dataset.folderId) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+
+    const rect = link.getBoundingClientRect();
+    const isAfter = e.clientY > (rect.top + rect.height / 2);
+
+    link.classList.toggle('drag-over-top', !isAfter);
+    link.classList.toggle('drag-over-bottom', isAfter);
+  });
+
+  link.addEventListener('dragleave', () => {
+    link.classList.remove('drag-over-top', 'drag-over-bottom');
+  });
+
+  link.addEventListener('drop', async (e) => {
+    if (!draggedBookmark || draggedBookmark === link) return;
+    if (draggedBookmark.dataset.folderId !== link.dataset.folderId) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    link.classList.remove('drag-over-top', 'drag-over-bottom');
+
+    const rect = link.getBoundingClientRect();
+    const isAfter = e.clientY > (rect.top + rect.height / 2);
+
+    if (isAfter) {
+      cardBody.insertBefore(draggedBookmark, link.nextSibling);
+    } else {
+      cardBody.insertBefore(draggedBookmark, link);
+    }
+
+    const allLinks = Array.from(cardBody.querySelectorAll('.bookmark-link'));
+    const newIndex = allLinks.indexOf(draggedBookmark);
+
+    await moveBookmark(draggedBookmark.dataset.id, draggedBookmark.dataset.folderId, newIndex);
+  });
+}
+
 // Drag & Drop Card Reordering
 let draggedCard = null;
 
 function setupCardDragDrop(cardEl, gridEl) {
   cardEl.addEventListener('dragstart', (e) => {
+    // If dragging a bookmark inside the card, do NOT drag the card
+    if (draggedBookmark || e.target.closest('.bookmark-link') || e.target.closest('.bookmark-drag-handle')) {
+      return;
+    }
     draggedCard = cardEl;
     cardEl.classList.add('dragging');
     document.body.classList.add('is-dragging-card');
@@ -437,6 +563,7 @@ function setupCardDragDrop(cardEl, gridEl) {
   });
 
   cardEl.addEventListener('dragover', (e) => {
+    if (draggedBookmark) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     if (draggedCard && draggedCard !== cardEl) {
@@ -449,6 +576,7 @@ function setupCardDragDrop(cardEl, gridEl) {
   });
 
   cardEl.addEventListener('drop', (e) => {
+    if (draggedBookmark) return;
     e.preventDefault();
     cardEl.classList.remove('drag-over');
     if (draggedCard && draggedCard !== cardEl) {

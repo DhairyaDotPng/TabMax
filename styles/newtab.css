@@ -455,17 +455,63 @@ body.is-dragging-card * {
   text-decoration: none;
   color: hsl(var(--card-foreground));
   font-size: 0.85rem;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
   min-width: 0;
+  position: relative;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
 }
 .bookmark-link:hover {
   background-color: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
 }
-.bookmark-link span {
+.bookmark-title {
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+.bookmark-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  opacity: 0;
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+}
+.bookmark-link:hover .bookmark-drag-handle {
+  opacity: 0.45;
+}
+.bookmark-drag-handle:hover {
+  opacity: 1 !important;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--muted));
+}
+.bookmark-drag-handle:active {
+  cursor: grabbing;
+}
+.bookmark-link.dragging-bookmark {
+  opacity: 0.35;
+  background-color: hsl(var(--muted));
+  transform: scale(0.98);
+}
+.bookmark-link.drag-over-top {
+  border-top-color: hsl(var(--primary));
+}
+.bookmark-link.drag-over-bottom {
+  border-bottom-color: hsl(var(--primary));
+}
+body.is-dragging-bookmark,
+body.is-dragging-bookmark * {
+  cursor: grabbing !important;
 }
 .favicon-img {
   width: 16px;

@@ -1,7 +1,7 @@
 // TabMax - New Tab Main Controller
 import { initTheme, toggleTheme, setupSettingsModal, openEmojiPicker } from './settings.js';
 import { fetchWeather } from './weather.js';
-import { loadBookmarks, renderQuickBar, renderCardsGrid } from './bookmarks.js';
+import { loadBookmarks, renderQuickBar, renderCardsGrid, isInternalBookmarkMoving } from './bookmarks.js';
 import { setupSearch } from './search.js';
 import { setupContextMenu } from './contextmenu.js';
 
@@ -31,7 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.bookmarks.onCreated.addListener(refreshBookmarks);
     chrome.bookmarks.onRemoved.addListener(refreshBookmarks);
     chrome.bookmarks.onChanged.addListener(refreshBookmarks);
-    chrome.bookmarks.onMoved.addListener(refreshBookmarks);
+    chrome.bookmarks.onMoved.addListener(() => {
+      if (!isInternalBookmarkMoving()) {
+        refreshBookmarks();
+      }
+    });
   }
 
   // 6. Initialize Search & Commands
