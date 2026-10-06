@@ -66,16 +66,15 @@
           <path d="m21 21-4.3-4.3"/>
         </svg>
 
-        <span id="engine-badge" class="engine-badge">Search</span>
+        <span id="engine-badge" class="engine-badge"></span>
 
         <input 
           id="search-input" 
           class="search-input" 
           type="text" 
-          placeholder="Search the web, or type /bkm, /notes, /gh, /yt..." 
+          placeholder="Search bookmarks, or type /web, /notes, /git, /yt..." 
           autocomplete="off" 
           spellcheck="false"
-          autofocus
         />
 
         <div class="search-badges">
@@ -83,7 +82,7 @@
         </div>
       </div>
 
-      <!-- Live /bkm Bookmark Fuzzy Search Dropdown -->
+      <!-- Live Bookmark Search Dropdown -->
       <div id="search-dropdown" class="search-dropdown"></div>
     </section>
 
@@ -191,7 +190,7 @@
         <div class="form-group">
           <div class="settings-section-header">
             <label class="form-label" style="font-size: 0.92rem; font-weight: 600;">Search Engines & Shortcuts</label>
-            <span class="form-hint">Type the prefix in search followed by your query (e.g. <code>/gh react</code>).</span>
+            <span class="form-hint">Type the prefix in search followed by your query (e.g. <code>/web query</code>, <code>/git react</code>).</span>
           </div>
           <div id="custom-engines-list" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;"></div>
 

@@ -22,7 +22,9 @@
 
 - 🎨 **Shadcn Monochrome Design**: Clean zinc/neutral dark and light themes with pure CSS variables, crisp borders, subtle elevation, and transparent PNG branding.
 - ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme toggle, and live weather widget powered by Open-Meteo API.
-- 📌 **Auto-Wrapping Quick Bar**: Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar. Automatically wraps across multiple rows.
+- 📌 **Auto-Wrapping Quick Bar with Long-Press Reordering**:
+  - Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar, automatically wrapping across multiple rows.
+  - **Long-Press & Drag**: Press and hold any favourite pill for ~200ms to lift it into drag mode and rearrange your favourites directly on the fly. The new order instantly syncs with Chrome's native bookmark hierarchy.
 - 📂 **Organized & Collapsible Folder Cards**:
   - Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards with scrollable lists.
   - **Collapse & Expand**: Folders can be collapsed into compact headers via an interactive chevron button or right-click menu, with state saved across sessions.
@@ -39,11 +41,14 @@
 - ⚙️ **Decoupled Preferences & Open in New Tab Toggle**:
   - Instant auto-saving toggle to choose whether clicking bookmarks opens in a new tab or the same tab.
   - Decoupled weather controls with dedicated "Update Weather" validation and zero network lag on general preference saves.
-- 🔍 **Instant Search & Shortcuts**:
+- 🔍 **Instant Bookmark Search, Interactive Suggestions & Shortcuts**:
+  - **Default Search**: Typing in the search bar immediately live-filters all your bookmarks with arrow-key navigation and instant Enter to open.
+  - **Interactive Shortcut Suggestions**: Tap or click the search bar to reveal a clean dropdown of all available search shortcuts (`/web`, `/git`, `/yt`, `/r`, `/notes`, and custom engines) with a max of 5 visible before smoothly scrolling.
+  - **Instant Engine Pills**: Typing any shortcut (e.g. `/web`, `/git`, `/yt`) instantly turns into an engine pill badge, automatically clears the shortcut prefix text, and updates the placeholder to `Search <Engine>...`. Press <kbd>Backspace</kbd> or click <kbd>&times;</kbd> to easily exit engine mode.
   - `Ctrl + K` to immediately focus the search bar.
-  - `/bkm <query>`: Live fuzzy bookmark search with arrow-key navigation and instant Enter to open.
-  - `/notes`: Instantly open your notes workspace.
-  - `/gh`, `/yt`, `/r`, etc.: Customizable search prefixes for GitHub, YouTube, Reddit, and your own custom search engines.
+  - `/web <query>`: Fast shortcut to search the web using your browser's default search engine.
+  - `/notes`: Instantly open your Markdown notes workspace.
+  - `/git`, `/yt`, `/r`, etc.: Customizable search prefixes for GitHub, YouTube, Reddit, and your own custom search engines.
 - 📝 **Google Keep Style Markdown Notes**:
   - Full-screen notes dashboard (`notes.html`) with card grid and pinned notes.
   - Split-screen note editor (Write mode & Live Markdown Preview).
@@ -105,9 +110,10 @@ When new features or fixes are pushed:
 | Action | Shortcut / Prefix | Description |
 | :--- | :--- | :--- |
 | **Focus Search** | <kbd>Ctrl</kbd> + <kbd>K</kbd> / <kbd>Cmd</kbd> + <kbd>K</kbd> | Instantly highlights the search bar |
-| **Search Bookmarks** | `/bkm <query>` | Live fuzzy search across all bookmarks with arrow keys |
+| **Search Bookmarks** | `<query>` (Default) | Live fuzzy search across all bookmarks with arrow keys |
+| **Search the Web** | `/web <query>` | Performs a web search via default search engine |
 | **Open Notes** | `/notes` | Navigates directly to the Markdown notes workspace |
-| **Search GitHub** | `/gh <query>` | Searches repositories on GitHub |
+| **Search GitHub** | `/git <query>` | Searches repositories on GitHub |
 | **Search YouTube** | `/yt <query>` | Searches videos on YouTube |
 | **Search Reddit** | `/r <query>` | Searches discussions on Reddit |
 | **Open Settings** | `⚙️` icon | Weather location, °C/°F, new tab toggle, and custom search engines |

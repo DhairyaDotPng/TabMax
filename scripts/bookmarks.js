@@ -79,7 +79,7 @@ export async function loadBookmarks() {
     });
   }
 
-  // Flatten all bookmarks for live fuzzy search (/bkm)
+  // Flatten all bookmarks for live fuzzy bookmark search
   indexAllBookmarks(tree);
 
   return { quickBookmarks, folderCards };
@@ -262,6 +262,7 @@ export function renderQuickBar(bookmarks, containerEl) {
     a.dataset.title = bkm.title || bkm.url;
     a.dataset.url = bkm.url;
     a.dataset.isQuickbarItem = 'true';
+    a.draggable = false;
 
     if (inNewTab) {
       a.target = '_blank';
@@ -278,8 +279,158 @@ export function renderQuickBar(bookmarks, containerEl) {
     span.textContent = bkm.title || bkm.url;
     a.appendChild(span);
 
+    setupQuickPillReorder(a, containerEl);
+
     containerEl.appendChild(a);
   }
+}
+
+// Long-press & Drag Reordering for Favourites in Quick Bar
+function setupQuickPillReorder(pill, containerEl) {
+  let longPressTimer = null;
+  let isDragging = false;
+  let hasDragged = false;
+  let startX = 0;
+  let startY = 0;
+  let initialIndex = -1;
+
+  pill.addEventListener('dragstart', (e) => e.preventDefault());
+
+  const onPointerMove = (e) => {
+    if (!isDragging) {
+      if (longPressTimer) {
+        const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+        if (dist > 8) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+          pill.classList.remove('long-pressing');
+        }
+      }
+      return;
+    }
+
+    e.preventDefault();
+
+    const target = findTargetSiblingPill(containerEl, e.clientX, e.clientY, pill);
+    if (target) {
+      if (target.isAfter) {
+        if (target.pill.nextSibling !== pill) {
+          containerEl.insertBefore(pill, target.pill.nextSibling);
+        }
+      } else {
+        if (pill.nextSibling !== target.pill) {
+          containerEl.insertBefore(pill, target.pill);
+        }
+      }
+    }
+  };
+
+  const onPointerUp = async () => {
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    pill.classList.remove('long-pressing');
+
+    if (isDragging) {
+      isDragging = false;
+
+      pill.classList.remove('is-dragging');
+      containerEl.classList.remove('is-reordering-pills');
+      document.body.classList.remove('is-reordering-favourites');
+
+      const allPills = Array.from(containerEl.querySelectorAll('.quick-pill'));
+      const newIndex = allPills.indexOf(pill);
+
+      if (newIndex !== -1 && newIndex !== initialIndex) {
+        await moveBookmark(pill.dataset.id, rootBookmarkBarId, newIndex);
+      }
+
+      // Keep hasDragged true briefly so the following click event is swallowed
+      setTimeout(() => {
+        hasDragged = false;
+      }, 60);
+    }
+  };
+
+  pill.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return; // Only primary mouse button or touch
+
+    startX = e.clientX;
+    startY = e.clientY;
+    hasDragged = false;
+    const allPills = Array.from(containerEl.querySelectorAll('.quick-pill'));
+    initialIndex = allPills.indexOf(pill);
+
+    pill.classList.add('long-pressing');
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
+    longPressTimer = setTimeout(() => {
+      isDragging = true;
+      hasDragged = true;
+      pill.classList.remove('long-pressing');
+      pill.classList.add('is-dragging');
+      containerEl.classList.add('is-reordering-pills');
+      document.body.classList.add('is-reordering-favourites');
+
+      if (navigator.vibrate) {
+        try { navigator.vibrate(30); } catch (_) {}
+      }
+    }, 220);
+  });
+
+  pill.addEventListener('click', (e) => {
+    if (hasDragged) {
+      e.preventDefault();
+      e.stopPropagation();
+      hasDragged = false;
+    }
+  });
+}
+
+function findTargetSiblingPill(container, clientX, clientY, currentPill) {
+  const el = document.elementFromPoint(clientX, clientY);
+  const fromPoint = el ? el.closest('.quick-pill') : null;
+  if (fromPoint && fromPoint !== currentPill && fromPoint.parentNode === container) {
+    const rect = fromPoint.getBoundingClientRect();
+    return { pill: fromPoint, isAfter: clientX > (rect.left + rect.width / 2) };
+  }
+
+  const pills = Array.from(container.querySelectorAll('.quick-pill:not(.is-dragging)'));
+  if (pills.length === 0) return null;
+
+  for (const pill of pills) {
+    const rect = pill.getBoundingClientRect();
+    if (clientY >= rect.top - 8 && clientY <= rect.bottom + 8) {
+      if (clientX < rect.left + rect.width / 2) {
+        return { pill, isAfter: false };
+      }
+      if (clientX <= rect.right + 8) {
+        return { pill, isAfter: true };
+      }
+    }
+  }
+
+  const last = pills[pills.length - 1];
+  const lastRect = last.getBoundingClientRect();
+  if (clientY > lastRect.bottom || (clientY >= lastRect.top && clientX > lastRect.right)) {
+    return { pill: last, isAfter: true };
+  }
+
+  const first = pills[0];
+  const firstRect = first.getBoundingClientRect();
+  if (clientY < firstRect.top || (clientY <= firstRect.bottom && clientX < firstRect.left)) {
+    return { pill: first, isAfter: false };
+  }
+
+  return null;
 }
 
 // Render Folder Cards Grid
