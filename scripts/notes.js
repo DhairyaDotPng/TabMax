@@ -1,6 +1,6 @@
 // TabMax - Notes Module (Google Keep style + Markdown + Guide)
 import { renderMarkdown } from './markdown.js';
-import { initTheme, toggleTheme } from './settings.js';
+import { initTheme } from './settings.js';
 
 let notes = [];
 let activeNoteId = null;
@@ -8,7 +8,6 @@ let dirHandle = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
-  document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
 
   loadNotes();
   setupCreator();
@@ -98,7 +97,7 @@ function createNoteCard(note) {
     pin.className = 'pin-badge';
     pin.title = 'Pinned';
     pin.innerHTML = `
-      <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="17" x2="12" y2="22"/>
         <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
       </svg>`;
@@ -166,6 +165,24 @@ function createNoteCard(note) {
   card.appendChild(content);
   card.appendChild(footer);
 
+  // Interactive Task List Checkboxes directly on note cards
+  card.querySelectorAll('.md-task-checkbox').forEach((checkbox, taskIdx) => {
+    checkbox.onclick = (e) => {
+      e.stopPropagation(); // Don't trigger card opening
+      let currentIdx = 0;
+      note.body = note.body.replace(/^- \[(x| )\] (.*$)/gim, (fullMatch, state, text) => {
+        if (currentIdx === taskIdx) {
+          currentIdx++;
+          return checkbox.checked ? `- [x] ${text}` : `- [ ] ${text}`;
+        }
+        currentIdx++;
+        return fullMatch;
+      });
+      note.updatedAt = Date.now();
+      saveNotes();
+    };
+  });
+
   // Click card to open full Editor
   card.onclick = () => openEditor(note.id);
 
@@ -179,6 +196,7 @@ function setupCreator() {
   const bodyInput = document.getElementById('creator-body');
   const saveBtn = document.getElementById('creator-save-btn');
   const closeBtn = document.getElementById('creator-close-btn');
+  const guideBtn = document.getElementById('creator-guide-btn');
 
   bodyInput.addEventListener('focus', () => {
     creator.classList.add('expanded');
@@ -187,6 +205,24 @@ function setupCreator() {
   closeBtn.addEventListener('click', () => {
     collapseCreator();
   });
+
+  if (guideBtn) {
+    guideBtn.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      const newNote = {
+        id: 'note_' + Date.now(),
+        title: title || '',
+        body: body || '',
+        pinned: false,
+        updatedAt: Date.now()
+      };
+      notes.unshift(newNote);
+      saveNotes();
+      collapseCreator();
+      openEditor(newNote.id);
+    });
+  }
 
   saveBtn.addEventListener('click', () => {
     const title = titleInput.value.trim();
@@ -250,6 +286,29 @@ function setupEditor() {
     textarea.style.display = 'none';
     preview.innerHTML = renderMarkdown(textarea.value);
     preview.classList.add('active');
+  });
+
+  // Interactive task list in preview
+  preview.addEventListener('change', (e) => {
+    if (e.target && e.target.classList.contains('md-task-checkbox')) {
+      const activeNote = notes.find(n => n.id === activeNoteId);
+      if (!activeNote) return;
+      const allCheckboxes = Array.from(preview.querySelectorAll('.md-task-checkbox'));
+      const targetIdx = allCheckboxes.indexOf(e.target);
+      let currentIdx = 0;
+      activeNote.body = activeNote.body.replace(/^- \[(x| )\] (.*$)/gim, (fullMatch, state, text) => {
+        if (currentIdx === targetIdx) {
+          currentIdx++;
+          return e.target.checked ? `- [x] ${text}` : `- [ ] ${text}`;
+        }
+        currentIdx++;
+        return fullMatch;
+      });
+      textarea.value = activeNote.body;
+      activeNote.updatedAt = Date.now();
+      saveNotes();
+      preview.innerHTML = renderMarkdown(activeNote.body);
+    }
   });
 
   // Back button to close editor
@@ -356,33 +415,67 @@ function setupSearch() {
   });
 }
 
-// Local Directory Sync using Web File System Access API
+// Local Directory Sync & Markdown File Export
 function setupDirectorySync() {
   const syncBtn = document.getElementById('sync-dir-btn');
   const syncStatus = document.getElementById('sync-status');
 
   const savedDirName = localStorage.getItem('tabmax_notes_dirname');
   if (savedDirName) {
-    syncStatus.textContent = `📁 Syncing to: ${savedDirName}`;
+    syncStatus.textContent = `📁 Linked: ${savedDirName}`;
   }
 
   syncBtn.addEventListener('click', async () => {
-    if (!('showDirectoryPicker' in window)) {
-      alert('File System Access API is not supported in this browser environment.');
-      return;
-    }
-    try {
-      dirHandle = await window.showDirectoryPicker();
-      localStorage.setItem('tabmax_notes_dirname', dirHandle.name);
-      syncStatus.textContent = `📁 Syncing to: ${dirHandle.name}`;
-      await syncAllToDirectory();
-      alert(`Successfully linked directory "${dirHandle.name}". Notes will auto-save here as .md files!`);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.warn('Directory selection canceled or failed:', err);
+    // Check if File System Access API is supported and permitted
+    if (typeof window.showDirectoryPicker === 'function') {
+      try {
+        dirHandle = await window.showDirectoryPicker();
+        localStorage.setItem('tabmax_notes_dirname', dirHandle.name);
+        syncStatus.textContent = `📁 Syncing to: ${dirHandle.name}`;
+        await syncAllToDirectory();
+        alert(`Successfully linked directory "${dirHandle.name}". Notes will auto-save here as .md files!`);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.warn('Native directory picker unavailable or restricted:', err);
       }
     }
+
+    // Chrome blocks showDirectoryPicker in chrome-extension:// origins for security.
+    // Export all notes to a markdown backup file on user's PC!
+    exportAllNotesAsMarkdown();
   });
+}
+
+function exportAllNotesAsMarkdown() {
+  if (!notes || notes.length === 0) {
+    alert('No notes available to export.');
+    return;
+  }
+
+  let exportContent = `# TabMax Notes Backup\nExported: ${new Date().toLocaleString()}\n\n---\n\n`;
+  notes.forEach((note) => {
+    exportContent += `## ${note.title || 'Untitled Note'}\n`;
+    exportContent += `*Last Updated: ${new Date(note.updatedAt || Date.now()).toLocaleString()}*\n\n`;
+    exportContent += `${note.body || ''}\n\n---\n\n`;
+  });
+
+  const blob = new Blob([exportContent], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `TabMax_Notes_Backup_${dateStr}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const syncStatus = document.getElementById('sync-status');
+  if (syncStatus) {
+    syncStatus.textContent = '✅ Notes Exported (.md)';
+    setTimeout(() => { syncStatus.textContent = ''; }, 4000);
+  }
 }
 
 async function syncAllToDirectory() {

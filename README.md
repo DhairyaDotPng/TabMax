@@ -11,8 +11,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Manifest-V3-black?style=flat-square" alt="Manifest V3">
-  <img src="https://img.shields.io/badge/UI-Shadcn%20Monochrome-black?style=flat-square" alt="Shadcn UI">
-  <img src="https://img.shields.io/badge/Font-Inter-blue?style=flat-square" alt="Inter Font">
+  <img src="https://img.shields.io/badge/UI-Shadcn%20%2B%20Material%203%20Expressive-black?style=flat-square" alt="Shadcn & Material 3 Expressive UI">
+  <img src="https://img.shields.io/badge/Typography-Inter%20%7C%20Google%20Sans-blue?style=flat-square" alt="Inter and Google Sans">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
 </p>
 
@@ -20,8 +20,17 @@
 
 ## ✨ Features
 
-- 🎨 **Shadcn Monochrome Design**: Clean zinc/neutral dark and light themes with pure CSS variables, crisp borders, subtle elevation, and transparent PNG branding.
-- ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme toggle, and live weather widget powered by Open-Meteo API.
+- 🎨 **Multi-Theme Design System**:
+  - **Default (Shadcn Zinc)**: Monochrome, minimalist aesthetic with crisp borders, clean rectangular radii, and neutral dark/light modes.
+  - **Material 3 Expressive (M3E)**: Expressive Google Material Design with fluid pill shapes, tonal elevation surfaces, and dynamic accent palettes.
+  - **Color Mode Selector**: Segmented toggle for Light, Dark, and Auto (System OS) modes.
+  - **6 Accent Palettes (M3E)**: Indigo, Ocean (Teal), Emerald (Sage), Rose (Coral), Golden Amber, and Violet (Lavender) with live visual color previews in settings and header popover.
+  - **Dynamic Google Fonts & Local Fonts**: One-click default font reset (Inter for Shadcn, Google Sans for M3E) or enter any Google Font (e.g. Poppins, Outfit, Roboto) for instant typography loading.
+- ⚙️ **Re-imagined & Categorized Settings Menu**:
+  - Neatly organized into 4 dedicated sections: **Appearance**, **Weather Settings**, **Search Engine & Shortcut Settings**, and **General Settings**.
+  - **Hardware-Accelerated Smooth Scrolling**: Isolated compositor layers and GPU hardware acceleration delivering silky-smooth 60 FPS scrolling.
+  - Top-bar quick appearance popover menu for rapid theme, mode, and accent switching on the fly.
+- ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme switcher popover, and live weather widget powered by Open-Meteo API.
 - 📌 **Auto-Wrapping Quick Bar with Long-Press Reordering**:
   - Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar, automatically wrapping across multiple rows.
   - **Long-Press & Drag**: Press and hold any favourite pill for ~200ms to lift it into drag mode and rearrange your favourites directly on the fly. The new order instantly syncs with Chrome's native bookmark hierarchy.
@@ -38,21 +47,16 @@
   - Right-click a folder card to rename it, collapse/expand it, change its emoji, or add a bookmark inside.
   - Right-click any bookmark or quick-bar pill to edit its name or URL, copy URL, or delete it.
   - All changes sync bidirectionally in real-time with Chrome's native bookmark database.
-- ⚙️ **Decoupled Preferences & Open in New Tab Toggle**:
-  - Instant auto-saving toggle to choose whether clicking bookmarks opens in a new tab or the same tab.
-  - Decoupled weather controls with dedicated "Update Weather" validation and zero network lag on general preference saves.
-- 🔍 **Instant Bookmark Search, Interactive Suggestions & Shortcuts**:
+- 🔍 **Instant Bookmark Search, Interactive Suggestions & Custom Shortcuts**:
   - **Default Search**: Typing in the search bar immediately live-filters all your bookmarks with arrow-key navigation and instant Enter to open.
-  - **Interactive Shortcut Suggestions**: Tap or click the search bar to reveal a clean dropdown of all available search shortcuts (`/web`, `/git`, `/yt`, `/r`, `/notes`, and custom engines) with a max of 5 visible before smoothly scrolling.
+  - **Interactive Shortcut Suggestions**: Tap or click the search bar to reveal a clean dropdown of all available search shortcuts (`/web`, `/git`, `/yt`, `/r`, `/notes`, and custom engines).
   - **Instant Engine Pills**: Typing any shortcut (e.g. `/web`, `/git`, `/yt`) instantly turns into an engine pill badge, automatically clears the shortcut prefix text, and updates the placeholder to `Search <Engine>...`. Press <kbd>Backspace</kbd> or click <kbd>&times;</kbd> to easily exit engine mode.
   - `Ctrl + K` to immediately focus the search bar.
-  - `/web <query>`: Fast shortcut to search the web using your browser's default search engine.
-  - `/notes`: Instantly open your Markdown notes workspace.
-  - `/git`, `/yt`, `/r`, etc.: Customizable search prefixes for GitHub, YouTube, Reddit, and your own custom search engines.
-- 📝 **Google Keep Style Markdown Notes**:
-  - Full-screen notes dashboard (`notes.html`) with card grid and pinned notes.
-  - Split-screen note editor (Write mode & Live Markdown Preview).
-  - 35% side panel containing a scrollable 25+ topic **Markdown Cheat-Sheet** (headings, bold/italic, task lists, code blocks, tables, callouts) — click any snippet to insert at cursor!
+  - Manage and delete custom engines in Settings with beautiful prefix chips matching the search dropdown.
+- 📝 **Google Keep Style Markdown Notes with Full Parity**:
+  - Full-screen notes dashboard (`notes.html`) adapting dynamically to Shadcn and Material 3 Expressive themes.
+  - Interactive markdown task lists (`- [ ]` / `- [x]`) with clickable checkboxes directly from the note cards.
+  - Split-screen note editor with Live Markdown Preview and 25+ topic **Markdown Cheat-Sheet** available when creating new notes as well as editing existing ones.
   - Local directory sync support via the File System Access API.
 - 🔒 **100% Private & Local**: Zero analytics, zero trackers, zero external servers. Everything runs entirely within your browser and local machine.
 

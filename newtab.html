@@ -35,18 +35,78 @@
           </svg>
         </button>
 
+        <!-- Theme & Accent Palette Menu Button -->
+        <button id="theme-menu-btn" class="action-btn" title="Appearance & Themes">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+          </svg>
+        </button>
+
+        <!-- Theme Menu Popover (Quick Palette & Mode Switcher) -->
+        <div id="theme-menu-popover" class="theme-menu-popover">
+          <!-- Overall Theme Design Dropdown -->
+          <div class="theme-menu-title">Theme Design</div>
+          <div class="custom-select-wrapper" id="popover-select-theme-style" style="margin-bottom: 0.85rem;">
+            <button type="button" class="custom-select-trigger">
+              <div class="custom-select-label-wrap">
+                <span class="custom-select-label">Default (Shadcn Zinc)</span>
+              </div>
+              <svg class="custom-select-arrow" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="custom-select-menu">
+              <div class="custom-select-option" data-value="default">Default (Shadcn Zinc)</div>
+              <div class="custom-select-option" data-value="m3e">Material 3 Expressive (M3E)</div>
+            </div>
+          </div>
+
+          <div class="theme-menu-title">Appearance Mode</div>
+          <div class="theme-mode-row">
+            <button type="button" class="theme-mode-btn" data-select-mode="light" title="Light Mode">Light</button>
+            <button type="button" class="theme-mode-btn" data-select-mode="dark" title="Dark Mode">Dark</button>
+            <button type="button" class="theme-mode-btn" data-select-mode="system" title="System Preference">Auto</button>
+          </div>
+
+          <!-- Accent selector row (displayed for M3E) -->
+          <div id="popover-accent-section">
+            <div class="theme-menu-title" style="margin-top: 0.65rem;">Accent Palette</div>
+            <div class="palette-grid">
+              <button class="palette-chip" data-select-palette="indigo" title="Indigo">
+                <span class="palette-color-dot" style="background: #4050b5;"></span>
+                <span class="palette-chip-name">Indigo</span>
+              </button>
+              <button class="palette-chip" data-select-palette="ocean" title="Ocean Teal">
+                <span class="palette-color-dot" style="background: #006877;"></span>
+                <span class="palette-chip-name">Ocean</span>
+              </button>
+              <button class="palette-chip" data-select-palette="emerald" title="Emerald Sage">
+                <span class="palette-color-dot" style="background: #1e6b41;"></span>
+                <span class="palette-chip-name">Emerald</span>
+              </button>
+              <button class="palette-chip" data-select-palette="rose" title="Rose Coral">
+                <span class="palette-color-dot" style="background: #9b394f;"></span>
+                <span class="palette-chip-name">Rose</span>
+              </button>
+              <button class="palette-chip" data-select-palette="amber" title="Amber Honey">
+                <span class="palette-color-dot" style="background: #7a5400;"></span>
+                <span class="palette-chip-name">Amber</span>
+              </button>
+              <button class="palette-chip" data-select-palette="violet" title="Violet Lavender">
+                <span class="palette-color-dot" style="background: #684ca0;"></span>
+                <span class="palette-chip-name">Violet</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Settings Button -->
         <button id="settings-btn" class="action-btn" title="Settings">
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
             <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
-
-        <!-- Theme Toggle Button -->
-        <button id="theme-toggle-btn" class="action-btn" title="Toggle Dark/Light Mode">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
         </button>
       </div>
@@ -99,7 +159,9 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 id="emoji-modal-title" class="modal-title">Customize Folder Emoji</h3>
-        <button class="modal-close-btn">&times;</button>
+        <button class="modal-close-btn" aria-label="Close">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -137,69 +199,176 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
+  <!-- Settings Modal (Categorized into 4 Sections: Appearance, Weather, Search, General) -->
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3 class="modal-title">TabMax Settings</h3>
-        <button class="modal-close-btn">&times;</button>
+        <h3 class="modal-title">Settings</h3>
+        <button class="modal-close-btn" aria-label="Close">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
       <div class="modal-body">
-        <!-- 1. General Preferences -->
-        <div class="form-group-row">
-          <div class="toggle-info">
-            <label class="form-label" for="setting-open-newtab">Open bookmarks in new tab</label>
-            <span class="form-hint">Clicking any bookmark or favourite opens a new tab</span>
+        
+        <!-- SECTION 1: Appearance Settings -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <h4 class="settings-section-title">Appearance</h4>
+            <span class="settings-section-desc">Customize theme style, color mode, accents, and typography.</span>
           </div>
-          <label class="toggle-switch">
-            <input id="setting-open-newtab" type="checkbox"/>
-            <span class="toggle-slider"></span>
-          </label>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.75rem;">
+            <!-- 1. Overall Theme Design Dropdown -->
+            <div class="form-group">
+              <label class="form-label">Theme Design</label>
+              <div class="custom-select-wrapper" id="custom-select-theme-style">
+                <button type="button" class="custom-select-trigger">
+                  <div class="custom-select-label-wrap">
+                    <span class="custom-select-label">Default (Shadcn Zinc)</span>
+                  </div>
+                  <svg class="custom-select-arrow" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="custom-select-menu">
+                  <div class="custom-select-option" data-value="default">Default (Shadcn Zinc)</div>
+                  <div class="custom-select-option" data-value="m3e">Material 3 Expressive (M3E)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Mode Selector (Light, Dark, Auto Segmented Pill) -->
+            <div class="form-group">
+              <label class="form-label">Color Mode</label>
+              <div class="theme-mode-row" id="settings-theme-mode-row">
+                <button type="button" class="theme-mode-btn" data-select-mode="light">Light</button>
+                <button type="button" class="theme-mode-btn" data-select-mode="dark">Dark</button>
+                <button type="button" class="theme-mode-btn" data-select-mode="system">Auto</button>
+              </div>
+            </div>
+
+            <!-- 3. Accent Palette Selector (With Visual representation dots, hidden for default) -->
+            <div class="form-group" id="settings-accent-group" style="display: none;">
+              <label class="form-label">Accent Palette</label>
+              <div class="custom-select-wrapper" id="custom-select-palette">
+                <button type="button" class="custom-select-trigger">
+                  <div class="custom-select-label-wrap">
+                    <span class="palette-color-dot" id="custom-select-palette-dot" style="background: #4050b5;"></span>
+                    <span class="custom-select-label">Indigo (Default M3)</span>
+                  </div>
+                  <svg class="custom-select-arrow" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="custom-select-menu">
+                  <div class="custom-select-option" data-value="indigo">
+                    <span class="palette-color-dot" style="background: #4050b5;"></span>
+                    <span>Indigo (Default M3)</span>
+                  </div>
+                  <div class="custom-select-option" data-value="ocean">
+                    <span class="palette-color-dot" style="background: #006877;"></span>
+                    <span>Ocean (Teal / Cyan)</span>
+                  </div>
+                  <div class="custom-select-option" data-value="emerald">
+                    <span class="palette-color-dot" style="background: #1e6b41;"></span>
+                    <span>Emerald (Botanical Sage)</span>
+                  </div>
+                  <div class="custom-select-option" data-value="rose">
+                    <span class="palette-color-dot" style="background: #9b394f;"></span>
+                    <span>Rose (Warm Coral)</span>
+                  </div>
+                  <div class="custom-select-option" data-value="amber">
+                    <span class="palette-color-dot" style="background: #7a5400;"></span>
+                    <span>Amber (Golden Honey)</span>
+                  </div>
+                  <div class="custom-select-option" data-value="violet">
+                    <span class="palette-color-dot" style="background: #684ca0;"></span>
+                    <span>Violet (Lavender / Magenta)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Typography / Font Sub-Setting -->
+            <div class="form-group">
+              <label class="form-label">Font Family</label>
+              <div style="display: flex; gap: 0.45rem; align-items: center;">
+                <input id="setting-custom-font" class="form-input" type="text" placeholder="e.g. Roboto, Poppins, Outfit, Inter" style="flex: 1;"/>
+                <button type="button" id="setting-font-apply-btn" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.8rem;">Apply</button>
+                <button type="button" id="setting-font-reset-btn" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.8rem;">Default Font</button>
+              </div>
+              <span id="font-status-msg" class="form-hint">Fetches any font from Google Fonts or uses local system fonts. Click "Default Font" to reset to theme default.</span>
+            </div>
+          </div>
         </div>
 
-        <hr style="border: none; border-top: 1px solid hsl(var(--border)); margin: 0.25rem 0;"/>
+        <hr class="settings-divider"/>
 
-        <!-- 2. Weather Settings (Separate Section) -->
-        <div class="form-group">
+        <!-- SECTION 2: Weather Settings -->
+        <div class="settings-section">
           <div class="settings-section-header">
-            <label class="form-label" style="font-size: 0.92rem; font-weight: 600;">Weather Widget</label>
-            <span class="form-hint">Uses Open-Meteo API for accurate weather conditions.</span>
+            <h4 class="settings-section-title">Weather Settings</h4>
+            <span class="settings-section-desc">Display live weather conditions and temperature on your new tab using Open-Meteo.</span>
           </div>
 
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+          <div style="display: flex; gap: 0.65rem; margin-top: 0.6rem; align-items: center;">
             <div style="flex: 2;">
               <input id="setting-weather-city" class="form-input" type="text" placeholder="e.g. New York, London, Tokyo" style="width: 100%;"/>
             </div>
             <div style="flex: 1;">
-              <select id="setting-weather-unit" class="form-select" style="width: 100%;">
-                <option value="celsius">Celsius (°C)</option>
-                <option value="fahrenheit">Fahrenheit (°F)</option>
-              </select>
+              <div class="custom-select-wrapper" id="custom-select-unit">
+                <button type="button" class="custom-select-trigger">
+                  <div class="custom-select-label-wrap">
+                    <span class="custom-select-label">Celsius (°C)</span>
+                  </div>
+                  <svg class="custom-select-arrow" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="custom-select-menu">
+                  <div class="custom-select-option" data-value="celsius">Celsius (°C)</div>
+                  <div class="custom-select-option" data-value="fahrenheit">Fahrenheit (°F)</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
             <span id="weather-status-msg" class="form-hint" style="color: hsl(var(--primary)); font-weight: 500;"></span>
-            <button id="update-weather-btn" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Update Weather</button>
+            <button id="update-weather-btn" class="btn btn-primary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">Update Weather</button>
           </div>
         </div>
 
-        <hr style="border: none; border-top: 1px solid hsl(var(--border)); margin: 0.25rem 0;"/>
+        <hr class="settings-divider"/>
 
-        <!-- 3. Custom Search Engines -->
-        <div class="form-group">
+        <!-- SECTION 3: Search Engine and Shortcut Settings -->
+        <div class="settings-section">
           <div class="settings-section-header">
-            <label class="form-label" style="font-size: 0.92rem; font-weight: 600;">Search Engines & Shortcuts</label>
-            <span class="form-hint">Type the prefix in search followed by your query (e.g. <code>/web query</code>, <code>/git react</code>).</span>
+            <h4 class="settings-section-title">Search Engine & Shortcut Settings</h4>
+            <span class="settings-section-desc">Type the prefix in search followed by your query (e.g. <code>/web query</code>, <code>/git react</code>).</span>
           </div>
-          <div id="custom-engines-list" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;"></div>
+          <div id="custom-engines-list" class="settings-shortcuts-list"></div>
 
           <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem;">
             <input id="new-engine-prefix" class="form-input" style="width: 25%;" placeholder="/prefix"/>
             <input id="new-engine-name" class="form-input" style="width: 30%;" placeholder="Name"/>
             <input id="new-engine-url" class="form-input" style="width: 45%;" placeholder="URL (%s)"/>
           </div>
-          <button id="add-engine-btn" class="btn btn-secondary" style="margin-top: 0.4rem; align-self: flex-start;">+ Add Shortcut</button>
+          <button id="add-engine-btn" class="btn btn-secondary" style="margin-top: 0.5rem; align-self: flex-start;">+ Add Shortcut</button>
+        </div>
+
+        <hr class="settings-divider"/>
+
+        <!-- SECTION 4: General Settings -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <h4 class="settings-section-title">General Settings</h4>
+            <span class="settings-section-desc">Configure general browsing preferences and tab behavior.</span>
+          </div>
+          <div class="form-group-row" style="margin-top: 0.65rem;">
+            <div class="toggle-info">
+              <label class="form-label" for="setting-open-newtab">Open bookmarks in new tab</label>
+              <span class="form-hint">Clicking any bookmark or favourite opens in a new tab</span>
+            </div>
+            <label class="toggle-switch">
+              <input id="setting-open-newtab" type="checkbox"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
@@ -214,7 +383,9 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 id="bookmark-dialog-title" class="modal-title">Edit Bookmark</h3>
-        <button class="modal-close-btn">&times;</button>
+        <button class="modal-close-btn" aria-label="Close">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
       <form id="bookmark-dialog-form" class="modal-body">
         <div class="form-group">

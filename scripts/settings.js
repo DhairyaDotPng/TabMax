@@ -1,52 +1,307 @@
-// TabMax - Settings & Theme & Emoji Picker Module
+// TabMax - Settings & Multi-Theme & Emoji Picker Module
 import { saveEmoji, getSavedEmoji } from './bookmarks.js';
 import { getCustomEngines, saveCustomEngines } from './search.js';
 import { fetchWeather } from './weather.js';
 
-// Theme Management
+// Available palettes metadata for visual indicators
+export const PALETTE_COLORS = {
+  indigo: '#4050b5',
+  ocean: '#006877',
+  emerald: '#1e6b41',
+  rose: '#9b394f',
+  amber: '#7a5400',
+  violet: '#684ca0'
+};
+
+export const PALETTE_NAMES = {
+  indigo: 'Indigo (Default M3)',
+  ocean: 'Ocean (Teal / Cyan)',
+  emerald: 'Emerald (Botanical Sage)',
+  rose: 'Rose (Warm Coral)',
+  amber: 'Golden Amber (Honey)',
+  violet: 'Violet (Lavender / Magenta)'
+};
+
+let themeStyleController = null;
+let popoverThemeStyleController = null;
+let paletteController = null;
+let unitController = null;
+
+// ==========================================================================
+// 1. Theme, Accent & Font Management
+// ==========================================================================
 export function initTheme() {
-  const saved = localStorage.getItem('tabmax_theme');
-  if (saved) {
-    setTheme(saved);
+  const savedStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+  const savedMode = localStorage.getItem('tabmax_theme_mode') || 'dark';
+  const savedPalette = localStorage.getItem('tabmax_theme_palette') || 'indigo';
+  const customFont = localStorage.getItem('tabmax_custom_font') || '';
+
+  applyThemeStyle(savedStyle);
+  applyThemeMode(savedMode);
+  applyThemePalette(savedPalette);
+
+  if (customFont) {
+    applyFont(customFont, false);
   } else {
-    // Detect system preference
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setTheme(prefersDark ? 'dark' : 'light');
+    resetFontToThemeDefault(savedStyle);
   }
 
-  // Listen for OS theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('tabmax_theme')) {
-      setTheme(e.matches ? 'dark' : 'light');
+  // Listen for OS theme changes if user opted for system
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if ((localStorage.getItem('tabmax_theme_mode') || 'system') === 'system') {
+      applyThemeMode('system');
+    }
+  });
+
+  setupModeButtons();
+  setupThemeMenu();
+}
+
+export function applyThemeStyle(style) {
+  const validStyle = style === 'm3e' ? 'm3e' : 'default';
+  document.documentElement.setAttribute('data-theme-style', validStyle);
+  localStorage.setItem('tabmax_theme_style', validStyle);
+
+  // Sync settings dropdown if open
+  if (themeStyleController) {
+    themeStyleController.setValue(validStyle);
+  }
+
+  // Sync popover theme selector dropdown
+  if (popoverThemeStyleController) {
+    popoverThemeStyleController.setValue(validStyle);
+  }
+
+  // Show/Hide accent palette selector in settings based on theme
+  const accentGroup = document.getElementById('settings-accent-group');
+  if (accentGroup) {
+    accentGroup.style.display = validStyle === 'm3e' ? 'flex' : 'none';
+  }
+
+  // Show/Hide accent section in header popover
+  const popoverAccentSection = document.getElementById('popover-accent-section');
+  if (popoverAccentSection) {
+    popoverAccentSection.style.display = validStyle === 'm3e' ? 'block' : 'none';
+  }
+
+  // If user hasn't set an explicit custom font, switch to theme's native default font
+  const savedCustomFont = localStorage.getItem('tabmax_custom_font');
+  if (!savedCustomFont) {
+    resetFontToThemeDefault(validStyle);
+  }
+}
+
+export function applyThemeMode(mode) {
+  let resolvedTheme = mode;
+  if (mode === 'system') {
+    resolvedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
+  localStorage.setItem('tabmax_theme_mode', mode);
+
+  // Update mode buttons across both settings & popover
+  document.querySelectorAll('.theme-mode-btn').forEach(btn => {
+    const btnMode = btn.dataset.selectMode || btn.dataset.mode;
+    btn.classList.toggle('active', btnMode === mode);
+  });
+}
+
+export function setupModeButtons() {
+  document.querySelectorAll('.theme-mode-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const m = btn.dataset.selectMode || btn.dataset.mode;
+      if (m) applyThemeMode(m);
+    };
+  });
+}
+
+export function applyThemePalette(palette) {
+  const validPalette = PALETTE_COLORS[palette] ? palette : 'indigo';
+  document.documentElement.setAttribute('data-palette', validPalette);
+  localStorage.setItem('tabmax_theme_palette', validPalette);
+
+  // Update chips in popover
+  document.querySelectorAll('.palette-chip').forEach(chip => {
+    const chipPalette = chip.dataset.selectPalette || chip.dataset.palette;
+    chip.classList.toggle('active', chipPalette === validPalette);
+  });
+
+  // Update settings dropdown visual dot & value
+  const dot = document.getElementById('custom-select-palette-dot');
+  if (dot && PALETTE_COLORS[validPalette]) {
+    dot.style.backgroundColor = PALETTE_COLORS[validPalette];
+  }
+  if (paletteController) {
+    paletteController.setValue(validPalette);
+  }
+}
+
+// Dynamic Google Fonts Loader & Applicator
+export function applyFont(fontName, persist = true) {
+  const trimmed = (fontName || '').trim();
+  const currentStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+  if (!trimmed) {
+    resetFontToThemeDefault(currentStyle);
+    return;
+  }
+
+  // Dynamically load Google Font stylesheet link if not already added
+  loadGoogleFont(trimmed);
+
+  // Apply to CSS variables and document with theme fallback
+  const fallback = currentStyle === 'm3e' ? 'var(--font-default-m3e)' : 'var(--font-default-shadcn)';
+  const fontStack = `"${trimmed}", ${fallback}`;
+  document.documentElement.style.setProperty('--font-sans', fontStack);
+  document.body.style.fontFamily = fontStack;
+
+  if (persist) {
+    localStorage.setItem('tabmax_custom_font', trimmed);
+  }
+}
+
+export function resetFontToThemeDefault(themeStyle) {
+  localStorage.removeItem('tabmax_custom_font');
+  const targetFont = themeStyle === 'm3e' ? 'var(--font-default-m3e)' : 'var(--font-default-shadcn)';
+  document.documentElement.style.setProperty('--font-sans', targetFont);
+  document.body.style.fontFamily = targetFont;
+
+  const input = document.getElementById('setting-custom-font');
+  if (input) {
+    input.value = '';
+  }
+
+  const msg = document.getElementById('font-status-msg');
+  if (msg) {
+    const defaultName = themeStyle === 'm3e' ? 'Google Sans' : 'Inter';
+    msg.textContent = `Using default font: ${defaultName}.`;
+    msg.style.color = 'hsl(var(--muted-foreground))';
+  }
+}
+
+function loadGoogleFont(fontName) {
+  const sanitized = fontName.replace(/['"]/g, '').trim();
+  const id = `gfont-${sanitized.toLowerCase().replace(/\s+/g, '-')}`;
+  if (document.getElementById(id)) return;
+
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  const encoded = encodeURIComponent(sanitized);
+  link.href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+export function setupThemeMenu() {
+  const menuBtn = document.getElementById('theme-menu-btn');
+  const popover = document.getElementById('theme-menu-popover');
+  if (!menuBtn || !popover) return;
+
+  const currentStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+  popoverThemeStyleController = initCustomSelect('popover-select-theme-style', currentStyle, (val) => {
+    applyThemeStyle(val);
+  });
+
+  menuBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    popover.classList.toggle('active');
+  };
+
+  popover.onclick = (e) => {
+    e.stopPropagation();
+  };
+
+  // Palette chips inside popover
+  popover.querySelectorAll('.palette-chip').forEach(chip => {
+    chip.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const p = chip.dataset.selectPalette || chip.dataset.palette;
+      if (p) applyThemePalette(p);
+    };
+  });
+
+  // Close popover on click outside
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target) && !menuBtn.contains(e.target)) {
+      popover.classList.remove('active');
     }
   });
 }
 
-export function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
-  setTheme(next);
-  localStorage.setItem('tabmax_theme', next);
-  return next;
-}
+// ==========================================================================
+// 2. Custom Select Dropdown Component
+// ==========================================================================
+export function initCustomSelect(containerId, initialValue, onChange) {
+  const container = document.getElementById(containerId);
+  if (!container) return { getValue: () => initialValue, setValue: () => {} };
 
-export function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const themeBtn = document.getElementById('theme-toggle-btn');
-  if (themeBtn) {
-    themeBtn.innerHTML = theme === 'dark' ? `
-      <svg class="icon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="4"/>
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-      </svg>` : `
-      <svg class="icon" viewBox="0 0 24 24">
-        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-      </svg>`;
-    themeBtn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  const trigger = container.querySelector('.custom-select-trigger');
+  const label = container.querySelector('.custom-select-label');
+  const menu = container.querySelector('.custom-select-menu');
+  const options = container.querySelectorAll('.custom-select-option');
+
+  let currentValue = initialValue;
+
+  function updateDisplay(val) {
+    currentValue = val;
+    options.forEach(opt => {
+      const isSelected = opt.dataset.value === val;
+      opt.classList.toggle('selected', isSelected);
+      if (isSelected && label) {
+        // Extract plain text label (ignoring dot element text)
+        const textNode = Array.from(opt.childNodes).find(n => n.nodeType === Node.TEXT_NODE || n.tagName === 'SPAN');
+        label.textContent = textNode ? textNode.textContent.trim() : opt.textContent.trim();
+      }
+    });
   }
+
+  updateDisplay(initialValue);
+
+  if (trigger && menu) {
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.contains('active');
+      document.querySelectorAll('.custom-select-menu.active').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.custom-select-wrapper.open').forEach(w => w.classList.remove('open'));
+
+      if (!isOpen) {
+        menu.classList.add('active');
+        container.classList.add('open');
+      }
+    };
+  }
+
+  options.forEach(opt => {
+    opt.onclick = (e) => {
+      e.stopPropagation();
+      const val = opt.dataset.value;
+      updateDisplay(val);
+      if (menu) menu.classList.remove('active');
+      container.classList.remove('open');
+      if (onChange) onChange(val);
+    };
+  });
+
+  return {
+    getValue: () => currentValue,
+    setValue: (val) => updateDisplay(val)
+  };
 }
 
-// Emoji Picker Setup
+// Global click handler to close custom select dropdowns
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.custom-select-wrapper')) {
+    document.querySelectorAll('.custom-select-menu.active').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.custom-select-wrapper.open').forEach(w => w.classList.remove('open'));
+  }
+});
+
+// ==========================================================================
+// 3. Emoji Picker Setup
+// ==========================================================================
 export function openEmojiPicker(folderId, folderTitle, onSaveCallback) {
   const modal = document.getElementById('emoji-modal');
   const titleEl = document.getElementById('emoji-modal-title');
@@ -71,7 +326,7 @@ export function openEmojiPicker(folderId, folderTitle, onSaveCallback) {
       if (segments.length > 0) {
         inputEl.value = segments[segments.length - 1].segment;
       }
-    } catch (e) {
+    } catch (_) {
       const chars = Array.from(val);
       inputEl.value = chars.slice(-1).join('');
     }
@@ -104,12 +359,13 @@ export function openEmojiPicker(folderId, folderTitle, onSaveCallback) {
   }, 50);
 }
 
-// Settings Modal Setup
+// ==========================================================================
+// 4. Categorized Settings Modal Setup
+// ==========================================================================
 export function setupSettingsModal(onSettingsSaved) {
   const settingsBtn = document.getElementById('settings-btn');
   const settingsModal = document.getElementById('settings-modal');
   const weatherInput = document.getElementById('setting-weather-city');
-  const unitSelect = document.getElementById('setting-weather-unit');
   const openNewTabToggle = document.getElementById('setting-open-newtab');
   const enginesListEl = document.getElementById('custom-engines-list');
   const addEngineBtn = document.getElementById('add-engine-btn');
@@ -121,11 +377,83 @@ export function setupSettingsModal(onSettingsSaved) {
   const updateWeatherBtn = document.getElementById('update-weather-btn');
   const weatherStatusMsg = document.getElementById('weather-status-msg');
 
-  // Populate current values
+  const fontInput = document.getElementById('setting-custom-font');
+  const fontApplyBtn = document.getElementById('setting-font-apply-btn');
+  const fontResetBtn = document.getElementById('setting-font-reset-btn');
+  const fontStatusMsg = document.getElementById('font-status-msg');
+
+  // Initialize Custom Select Controllers
+  const currentStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+  const currentMode = localStorage.getItem('tabmax_theme_mode') || 'dark';
+  const currentPalette = localStorage.getItem('tabmax_theme_palette') || 'indigo';
+  const currentUnit = localStorage.getItem('tabmax_weather_unit') || 'celsius';
+
+  themeStyleController = initCustomSelect('custom-select-theme-style', currentStyle, (val) => {
+    applyThemeStyle(val);
+  });
+
+  paletteController = initCustomSelect('custom-select-palette', currentPalette, (val) => {
+    applyThemePalette(val);
+  });
+
+  unitController = initCustomSelect('custom-select-unit', currentUnit, (val) => {
+    localStorage.setItem('tabmax_weather_unit', val);
+  });
+
+  setupModeButtons();
+
+  // Font customization handlers
+  if (fontApplyBtn && fontInput) {
+    fontApplyBtn.onclick = () => {
+      const font = fontInput.value.trim();
+      if (!font) {
+        resetFontToThemeDefault(localStorage.getItem('tabmax_theme_style') || 'default');
+        return;
+      }
+      applyFont(font, true);
+      if (fontStatusMsg) {
+        fontStatusMsg.textContent = `Applied font: "${font}"`;
+        fontStatusMsg.style.color = 'hsl(var(--primary))';
+        setTimeout(() => {
+          if (fontStatusMsg) {
+            fontStatusMsg.textContent = 'Fetches any font from Google Fonts or uses local system fonts.';
+            fontStatusMsg.style.color = 'hsl(var(--muted-foreground))';
+          }
+        }, 3500);
+      }
+    };
+  }
+
+  if (fontResetBtn) {
+    fontResetBtn.onclick = () => {
+      const currentThemeStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+      resetFontToThemeDefault(currentThemeStyle);
+    };
+  }
+
+  // Populate current values upon opening settings
   settingsBtn.onclick = () => {
     weatherInput.value = localStorage.getItem('tabmax_weather_city') || 'New York';
-    unitSelect.value = localStorage.getItem('tabmax_weather_unit') || 'celsius';
     openNewTabToggle.checked = localStorage.getItem('tabmax_open_new_tab') === 'true';
+
+    const savedFont = localStorage.getItem('tabmax_custom_font') || '';
+    if (fontInput) fontInput.value = savedFont;
+
+    const style = localStorage.getItem('tabmax_theme_style') || 'default';
+    const mode = localStorage.getItem('tabmax_theme_mode') || 'dark';
+    const pal = localStorage.getItem('tabmax_theme_palette') || 'indigo';
+    const unit = localStorage.getItem('tabmax_weather_unit') || 'celsius';
+
+    if (themeStyleController) themeStyleController.setValue(style);
+    applyThemeMode(mode);
+    if (paletteController) paletteController.setValue(pal);
+    if (unitController) unitController.setValue(unit);
+
+    const accentGroup = document.getElementById('settings-accent-group');
+    if (accentGroup) {
+      accentGroup.style.display = style === 'm3e' ? 'flex' : 'none';
+    }
+
     if (weatherStatusMsg) weatherStatusMsg.textContent = '';
     renderEnginesList(enginesListEl);
     openModal(settingsModal);
@@ -142,7 +470,7 @@ export function setupSettingsModal(onSettingsSaved) {
   if (updateWeatherBtn) {
     updateWeatherBtn.onclick = async () => {
       const city = weatherInput.value.trim() || 'New York';
-      const unit = unitSelect.value || 'celsius';
+      const unit = unitController ? unitController.getValue() : 'celsius';
 
       updateWeatherBtn.disabled = true;
       if (weatherStatusMsg) {
@@ -176,6 +504,7 @@ export function setupSettingsModal(onSettingsSaved) {
     };
   }
 
+  // Add shortcut engine
   addEngineBtn.onclick = () => {
     let prefix = enginePrefixInput.value.trim().toLowerCase();
     const name = engineNameInput.value.trim();
@@ -205,11 +534,10 @@ export function setupSettingsModal(onSettingsSaved) {
 
   saveSettingsBtn.onclick = async () => {
     const city = weatherInput.value.trim() || 'New York';
-    const unit = unitSelect.value || 'celsius';
+    const unit = unitController ? unitController.getValue() : 'celsius';
     const savedCity = localStorage.getItem('tabmax_weather_city') || 'New York';
     const savedUnit = localStorage.getItem('tabmax_weather_unit') || 'celsius';
 
-    // Only validate weather if user actually changed city or unit
     if (city.toLowerCase() !== savedCity.toLowerCase() || unit !== savedUnit) {
       saveSettingsBtn.textContent = 'Checking location...';
       saveSettingsBtn.disabled = true;
@@ -247,29 +575,45 @@ export function setupSettingsModal(onSettingsSaved) {
   });
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function renderEnginesList(container) {
   const engines = getCustomEngines();
   container.innerHTML = '';
 
-  Object.entries(engines).forEach(([prefix, data]) => {
+  const entries = Object.entries(engines);
+  if (entries.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'settings-empty-hint';
+    empty.textContent = 'No custom search shortcuts configured.';
+    container.appendChild(empty);
+    return;
+  }
+
+  entries.forEach(([prefix, data]) => {
     const row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.alignItems = 'center';
-    row.style.justifyContent = 'space-between';
-    row.style.padding = '0.4rem 0.6rem';
-    row.style.backgroundColor = 'hsl(var(--muted))';
-    row.style.borderRadius = 'var(--radius-sm)';
-    row.style.fontSize = '0.82rem';
+    row.className = 'settings-shortcut-item';
 
     row.innerHTML = `
-      <div>
-        <strong>${prefix}</strong> — <span>${data.name}</span>
-        <div style="font-size: 0.72rem; color: hsl(var(--muted-foreground)); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${data.url}</div>
+      <div class="search-item-left">
+        <span class="shortcut-tag">${escapeHtml(prefix)}</span>
+        <div class="settings-shortcut-info">
+          <div class="search-item-title">${escapeHtml(data.name)}</div>
+          <div class="search-item-url" title="${escapeHtml(data.url)}">${escapeHtml(data.url)}</div>
+        </div>
       </div>
-      <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" data-prefix="${prefix}">Delete</button>
+      <button type="button" class="btn btn-secondary settings-shortcut-delete-btn" data-prefix="${escapeHtml(prefix)}">Delete</button>
     `;
 
-    row.querySelector('button').onclick = () => {
+    row.querySelector('.settings-shortcut-delete-btn').onclick = () => {
       delete engines[prefix];
       saveCustomEngines(engines);
       renderEnginesList(container);

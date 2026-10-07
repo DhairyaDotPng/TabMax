@@ -29,9 +29,11 @@ export function renderMarkdown(md) {
   html = html.replace(/^\>\> (.*$)/gim, '<blockquote class="md-blockquote md-nested-quote">$1</blockquote>');
   html = html.replace(/^\> (.*$)/gim, '<blockquote class="md-blockquote">$1</blockquote>');
 
-  // Task lists
-  html = html.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked disabled/> <span class="md-task-done">$1</span></div>');
-  html = html.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" disabled/> <span>$1</span></div>');
+  // Task lists (interactive checkboxes)
+  html = html.replace(/^- \[(x| )\] (.*$)/gim, (match, checkedState, text) => {
+    const isChecked = checkedState.toLowerCase() === 'x';
+    return `<label class="md-task-item"><input type="checkbox" class="md-task-checkbox" ${isChecked ? 'checked' : ''}/> <span class="${isChecked ? 'md-task-done' : ''}">${text}</span></label>`;
+  });
 
   // Numbered lists
   html = html.replace(/^\d+\.\s+(.*$)/gim, '<li class="md-ol-li">$1</li>');

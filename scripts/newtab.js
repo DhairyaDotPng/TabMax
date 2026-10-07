@@ -1,14 +1,13 @@
 // TabMax - New Tab Main Controller
-import { initTheme, toggleTheme, setupSettingsModal, openEmojiPicker } from './settings.js';
+import { initTheme, setupSettingsModal, openEmojiPicker } from './settings.js';
 import { fetchWeather } from './weather.js';
 import { loadBookmarks, renderQuickBar, renderCardsGrid, isInternalBookmarkMoving } from './bookmarks.js';
 import { setupSearch } from './search.js';
 import { setupContextMenu } from './contextmenu.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Initialize Theme
+  // 1. Initialize Multi-Theme & Design System
   initTheme();
-  document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
 
   // 2. Start Live Clock & Date
   initClock();

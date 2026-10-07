@@ -37,12 +37,6 @@
           </svg>
           <span>Sync Folder</span>
         </button>
-
-        <button id="theme-toggle-btn" class="back-btn" style="padding: 0.45rem;" title="Toggle Theme">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-          </svg>
-        </button>
       </div>
     </header>
 
@@ -52,8 +46,11 @@
         <input id="creator-title" class="creator-title-input" type="text" placeholder="Title"/>
         <textarea id="creator-body" class="creator-body-input" placeholder="Take a note... (supports Markdown)"></textarea>
         <div class="creator-actions">
-          <span style="font-size: 0.75rem; color: hsl(var(--muted-foreground));">Tip: Supports Markdown syntax</span>
-          <div style="display: flex; gap: 0.5rem;">
+          <button id="creator-guide-btn" type="button" class="creator-guide-link" title="Open Split-Screen Editor with Markdown Cheat-Sheet">
+            <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
+            <span>Markdown Cheat-Sheet & Editor ↗</span>
+          </button>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
             <button id="creator-close-btn" class="btn btn-secondary">Cancel</button>
             <button id="creator-save-btn" class="btn btn-primary">Save Note</button>
           </div>

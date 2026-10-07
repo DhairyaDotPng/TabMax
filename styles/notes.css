@@ -25,7 +25,7 @@
   border: 1px solid hsl(var(--card-border));
   color: hsl(var(--foreground));
   padding: 0.45rem 0.95rem;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
@@ -35,7 +35,9 @@
 }
 .back-btn:hover {
   background-color: hsl(var(--accent));
-  transform: translateX(-2px);
+  border-color: hsl(var(--border));
+  color: hsl(var(--accent-foreground));
+  transform: translateY(-1px);
 }
 .notes-search-wrapper {
   max-width: 480px;
@@ -45,7 +47,7 @@
   width: 100%;
   background-color: hsl(var(--card));
   border: 1px solid hsl(var(--card-border));
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   color: hsl(var(--foreground));
@@ -192,11 +194,51 @@
   color: hsl(var(--foreground));
   background-color: hsl(var(--muted));
 }
+.creator-guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: hsl(var(--primary));
+  cursor: pointer;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+.creator-guide-link:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+.creator-guide-link .icon {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
 .pin-badge {
   position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
-  color: hsl(var(--primary));
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border-radius: var(--radius-sm);
+  border: 1px solid hsl(var(--border) / 0.6);
+  box-shadow: var(--shadow-subtle);
+}
+.pin-badge .icon {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  fill: none;
 }
 
 /* Note Editor Split View (65% Editor, 35% Markdown Guide) */
@@ -204,12 +246,21 @@
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
   z-index: 300;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  isolation: isolate;
+}
+.editor-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: -1;
+  pointer-events: none;
 }
 .editor-overlay.active {
   display: flex;
@@ -224,6 +275,11 @@
   height: 88vh;
   display: flex;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  contain: paint;
+  transform: translateZ(0);
 }
 
 /* Left: 65% Editor & Live Preview */
@@ -320,6 +376,10 @@
   overflow-y: auto;
   max-height: 100%;
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+  transform: translateZ(0);
+  contain: content;
 }
 .guide-header-sticky {
   position: sticky;
@@ -462,7 +522,40 @@
 }
 .md-li { margin-left: 1.25rem; list-style: disc; margin-bottom: 0.15rem; }
 .md-ol-li { margin-left: 1.25rem; list-style: decimal; margin-bottom: 0.15rem; }
-.md-task-item { display: flex; align-items: center; gap: 0.45rem; margin: 0.25rem 0; }
+.md-task-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+.md-task-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 3.5px;
+  border: 1.5px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.md-task-checkbox:checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+.md-task-checkbox:checked::before {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid hsl(var(--primary-foreground));
+  border-bottom: 2px solid hsl(var(--primary-foreground));
+  transform: rotate(-45deg) translate(1px, -1px);
+}
 .md-task-done { text-decoration: line-through; opacity: 0.55; }
 .md-link { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
 .md-highlight {

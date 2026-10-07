@@ -1,7 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ==========================================================================
+   TabMax - Unified Multi-Theme & Design System Tokens
+   Supports: Default (Shadcn Pure Zinc) & Material 3 Expressive (M3E)
+   Dynamic Google Fonts & Local Fallbacks
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;600;700&family=Product+Sans:wght@400;700&family=Open+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Shadcn Monochrome Design Tokens - Light Mode (Pure Neutral/Zinc) */
+  /* Dynamic font variables */
+  --font-default-shadcn: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-default-m3e: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-default-shadcn);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Universal button & input font inheritance */
+  font-family: var(--font-sans);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   THEME 1: SHADCN DEFAULT THEME (data-theme-style="default" or default)
+   -------------------------------------------------------------------------- */
+:root,
+html[data-theme-style="default"] {
   --background: 0 0% 100%;
   --foreground: 0 0% 9%;
   
@@ -14,6 +38,8 @@
   
   --primary: 0 0% 9%;
   --primary-foreground: 0 0% 98%;
+  --primary-container: 0 0% 92%;
+  --on-primary-container: 0 0% 9%;
   
   --secondary: 0 0% 96.1%;
   --secondary-foreground: 0 0% 9%;
@@ -32,19 +58,29 @@
   --ring: 0 0% 9%;
   
   --radius: 0.85rem;
+  --radius-xs: 4px;
   --radius-sm: 0.45rem;
   --radius-md: 0.65rem;
   --radius-lg: 0.85rem;
   --radius-xl: 1.1rem;
+  --radius-2xl: 1.35rem;
+  --radius-3xl: 1.6rem;
   --radius-full: 9999px;
 
   --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   --shadow-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 12px 28px -5px rgba(0, 0, 0, 0.15);
+
+  --md-sys-color-surface-container: hsl(0 0% 100%);
+  --md-sys-color-surface-container-high: hsl(0 0% 98%);
+  --md-sys-color-surface-container-highest: hsl(0 0% 95%);
+  --md-sys-color-surface-container-low: hsl(0 0% 100%);
+  --md-sys-color-surface-container-lowest: hsl(0 0% 100%);
 }
 
-[data-theme="dark"] {
-  /* Shadcn Monochrome Design Tokens - Dark Mode (Pure Neutral/Zinc, No Bluish Tint) */
+[data-theme="dark"],
+html[data-theme-style="default"][data-theme="dark"] {
   --background: 0 0% 3.9%;
   --foreground: 0 0% 98%;
   
@@ -57,6 +93,8 @@
   
   --primary: 0 0% 98%;
   --primary-foreground: 0 0% 9%;
+  --primary-container: 0 0% 18%;
+  --on-primary-container: 0 0% 98%;
   
   --secondary: 0 0% 12.5%;
   --secondary-foreground: 0 0% 98%;
@@ -77,8 +115,821 @@
   --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow-card: 0 2px 6px 0 rgba(0, 0, 0, 0.6);
   --shadow-elevated: 0 12px 28px -5px rgba(0, 0, 0, 0.75);
+  --shadow-modal: 0 16px 36px -4px rgba(0, 0, 0, 0.85);
+
+  --md-sys-color-surface-container: hsl(0 0% 6.8%);
+  --md-sys-color-surface-container-high: hsl(0 0% 10%);
+  --md-sys-color-surface-container-highest: hsl(0 0% 14%);
+  --md-sys-color-surface-container-low: hsl(0 0% 3.9%);
+  --md-sys-color-surface-container-lowest: hsl(0 0% 2%);
 }
 
+/* --------------------------------------------------------------------------
+   THEME 2: MATERIAL 3 EXPRESSIVE (data-theme-style="m3e")
+   Rich tonal containers, fluid curves, dynamic accent palettes
+   -------------------------------------------------------------------------- */
+html[data-theme-style="m3e"] {
+  --font-sans: var(--font-default-m3e);
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-full: 9999px;
+
+  --md-motion-spring: cubic-bezier(0.2, 0, 0, 1);
+  --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --md-elevation-2: 0 3px 8px 2px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+  --md-elevation-3: 0 6px 16px 3px rgba(0, 0, 0, 0.16), 0 2px 6px 0 rgba(0, 0, 0, 0.10);
+  --md-elevation-4: 0 10px 24px 5px rgba(0, 0, 0, 0.20), 0 4px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* M3E Palette 1: Indigo */
+html[data-theme-style="m3e"],
+html[data-theme-style="m3e"][data-palette="indigo"] {
+  --md-sys-color-primary: #4050b5;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #dce1ff;
+  --md-sys-color-on-primary-container: #00105c;
+
+  --md-sys-color-surface: #fbf8fd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f4f2f8;
+  --md-sys-color-surface-container: #e2e4f0;
+  --md-sys-color-surface-container-high: #dadce8;
+  --md-sys-color-surface-container-highest: #cfd2df;
+  --md-sys-color-on-surface: #181920;
+  --md-sys-color-on-surface-variant: #434450;
+  --md-sys-color-outline: #747582;
+  --md-sys-color-outline-variant: #c3c4d2;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"],
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="indigo"] {
+  --md-sys-color-primary: #bcc3ff;
+  --md-sys-color-on-primary: #0a1b7e;
+  --md-sys-color-primary-container: #283794;
+  --md-sys-color-on-primary-container: #dfe2ff;
+
+  --md-sys-color-surface: #0f1016;
+  --md-sys-color-surface-container-lowest: #090a0f;
+  --md-sys-color-surface-container-low: #111219;
+  --md-sys-color-surface-container: #212330;
+  --md-sys-color-surface-container-high: #2b2e3e;
+  --md-sys-color-surface-container-highest: #373a4d;
+  --md-sys-color-on-surface: #e4e2ea;
+  --md-sys-color-on-surface-variant: #c4c3cf;
+  --md-sys-color-outline: #8e8d99;
+  --md-sys-color-outline-variant: #3e404f;
+}
+
+/* M3E Palette 2: Ocean */
+html[data-theme-style="m3e"][data-palette="ocean"] {
+  --md-sys-color-primary: #006877;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #a4eeff;
+  --md-sys-color-on-primary-container: #001f25;
+
+  --md-sys-color-surface: #f6fafd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #edf4f7;
+  --md-sys-color-surface-container: #d9e7ec;
+  --md-sys-color-surface-container-high: #cfdfe5;
+  --md-sys-color-surface-container-highest: #c4d6dc;
+  --md-sys-color-on-surface: #171d1e;
+  --md-sys-color-on-surface-variant: #40484a;
+  --md-sys-color-outline: #70787b;
+  --md-sys-color-outline-variant: #bfc8cb;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="ocean"] {
+  --md-sys-color-primary: #53d7f2;
+  --md-sys-color-on-primary: #00363f;
+  --md-sys-color-primary-container: #004e5a;
+  --md-sys-color-on-primary-container: #a4eeff;
+
+  --md-sys-color-surface: #0e1416;
+  --md-sys-color-surface-container-lowest: #090f11;
+  --md-sys-color-surface-container-low: #12181a;
+  --md-sys-color-surface-container: #212a2e;
+  --md-sys-color-surface-container-high: #2b3539;
+  --md-sys-color-surface-container-highest: #374247;
+  --md-sys-color-on-surface: #deebef;
+  --md-sys-color-on-surface-variant: #bfc8cb;
+  --md-sys-color-outline: #8a9295;
+  --md-sys-color-outline-variant: #3f484b;
+}
+
+/* M3E Palette 3: Emerald */
+html[data-theme-style="m3e"][data-palette="emerald"] {
+  --md-sys-color-primary: #1e6b41;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #a6f3be;
+  --md-sys-color-on-primary-container: #00210e;
+
+  --md-sys-color-surface: #f6fbf4;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #edf4eb;
+  --md-sys-color-surface-container: #dce7da;
+  --md-sys-color-surface-container-high: #d2ddd0;
+  --md-sys-color-surface-container-highest: #c7d2c6;
+  --md-sys-color-on-surface: #181d18;
+  --md-sys-color-on-surface-variant: #424941;
+  --md-sys-color-outline: #727970;
+  --md-sys-color-outline-variant: #c2c9bf;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="emerald"] {
+  --md-sys-color-primary: #8bd6a3;
+  --md-sys-color-on-primary: #00391d;
+  --md-sys-color-primary-container: #00522c;
+  --md-sys-color-on-primary-container: #a6f3be;
+
+  --md-sys-color-surface: #0e1510;
+  --md-sys-color-surface-container-lowest: #090f0b;
+  --md-sys-color-surface-container-low: #121914;
+  --md-sys-color-surface-container: #212b23;
+  --md-sys-color-surface-container-high: #2b362e;
+  --md-sys-color-surface-container-highest: #37433a;
+  --md-sys-color-on-surface: #dee5dd;
+  --md-sys-color-on-surface-variant: #c2c9bf;
+  --md-sys-color-outline: #8c9389;
+  --md-sys-color-outline-variant: #424941;
+}
+
+/* M3E Palette 4: Rose */
+html[data-theme-style="m3e"][data-palette="rose"] {
+  --md-sys-color-primary: #9b394f;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffd9df;
+  --md-sys-color-on-primary-container: #3f0015;
+
+  --md-sys-color-surface: #fff8f8;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f9ecee;
+  --md-sys-color-surface-container: #edd9dc;
+  --md-sys-color-surface-container-high: #e3cfd3;
+  --md-sys-color-surface-container-highest: #d7c3c7;
+  --md-sys-color-on-surface: #22191b;
+  --md-sys-color-on-surface-variant: #524345;
+  --md-sys-color-outline: #847375;
+  --md-sys-color-outline-variant: #d6c2c4;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="rose"] {
+  --md-sys-color-primary: #ffb1c0;
+  --md-sys-color-on-primary: #5f0624;
+  --md-sys-color-primary-container: #7d2039;
+  --md-sys-color-on-primary-container: #ffd9df;
+
+  --md-sys-color-surface: #180e10;
+  --md-sys-color-surface-container-lowest: #12090b;
+  --md-sys-color-surface-container-low: #1e1315;
+  --md-sys-color-surface-container: #312124;
+  --md-sys-color-surface-container-high: #3d2b2e;
+  --md-sys-color-surface-container-highest: #4b3639;
+  --md-sys-color-on-surface: #eedfe1;
+  --md-sys-color-on-surface-variant: #d6c2c4;
+  --md-sys-color-outline: #9e8c8e;
+  --md-sys-color-outline-variant: #524345;
+}
+
+/* M3E Palette 5: Amber */
+html[data-theme-style="m3e"][data-palette="amber"] {
+  --md-sys-color-primary: #7a5400;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffdf9e;
+  --md-sys-color-on-primary-container: #261900;
+
+  --md-sys-color-surface: #fff8f4;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f8eee4;
+  --md-sys-color-surface-container: #ebdfd3;
+  --md-sys-color-surface-container-high: #e1d4c8;
+  --md-sys-color-surface-container-highest: #d5c8bd;
+  --md-sys-color-on-surface: #201a15;
+  --md-sys-color-on-surface-variant: #4e453c;
+  --md-sys-color-outline: #80756b;
+  --md-sys-color-outline-variant: #d2c4b8;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="amber"] {
+  --md-sys-color-primary: #f8bd4b;
+  --md-sys-color-on-primary: #412d00;
+  --md-sys-color-primary-container: #5d3f00;
+  --md-sys-color-on-primary-container: #ffdf9e;
+
+  --md-sys-color-surface: #17110c;
+  --md-sys-color-surface-container-lowest: #100c07;
+  --md-sys-color-surface-container-low: #1d1611;
+  --md-sys-color-surface-container: #2e241c;
+  --md-sys-color-surface-container-high: #392c1e;
+  --md-sys-color-surface-container-highest: #493927;
+  --md-sys-color-on-surface: #e7dfd8;
+  --md-sys-color-on-surface-variant: #d1c4b4;
+  --md-sys-color-outline: #9a8e80;
+  --md-sys-color-outline-variant: #4b4236;
+}
+
+/* M3E Palette 6: Violet */
+html[data-theme-style="m3e"][data-palette="violet"] {
+  --md-sys-color-primary: #684ca0;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #eddcff;
+  --md-sys-color-on-primary-container: #240056;
+
+  --md-sys-color-surface: #fff7fd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f6ecf6;
+  --md-sys-color-surface-container: #e8d9eb;
+  --md-sys-color-surface-container-high: #dfcfdf;
+  --md-sys-color-surface-container-highest: #d3c2d4;
+  --md-sys-color-on-surface: #1f1823;
+  --md-sys-color-on-surface-variant: #4c4250;
+  --md-sys-color-outline: #7d7382;
+  --md-sys-color-outline-variant: #cec2cf;
+}
+
+html[data-theme-style="m3e"][data-theme="dark"][data-palette="violet"] {
+  --md-sys-color-primary: #d7baff;
+  --md-sys-color-on-primary: #391c71;
+  --md-sys-color-primary-container: #503388;
+  --md-sys-color-on-primary-container: #eddcff;
+
+  --md-sys-color-surface: #120d18;
+  --md-sys-color-surface-container-lowest: #0c0812;
+  --md-sys-color-surface-container-low: #181220;
+  --md-sys-color-surface-container: #291e36;
+  --md-sys-color-surface-container-high: #352745;
+  --md-sys-color-surface-container-highest: #443257;
+  --md-sys-color-on-surface: #e7dfeb;
+  --md-sys-color-on-surface-variant: #cec2cf;
+  --md-sys-color-outline: #978c9b;
+  --md-sys-color-outline-variant: #49404d;
+}
+
+/* --------------------------------------------------------------------------
+   M3E Mapping Overrides (Signature Filled Tonal Styling & Authentic M3 Contrast)
+   -------------------------------------------------------------------------- */
+html[data-theme-style="m3e"] {
+  --font-sans: var(--font-default-m3e);
+}
+
+html[data-theme-style="m3e"] body {
+  font-family: var(--font-sans) !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+html[data-theme-style="m3e"] button,
+html[data-theme-style="m3e"] input,
+html[data-theme-style="m3e"] select,
+html[data-theme-style="m3e"] textarea {
+  font-family: inherit;
+}
+
+/* 1. Header & Weather */
+html[data-theme-style="m3e"] .weather-widget {
+  background-color: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0.65rem 1.25rem !important;
+  min-height: 44px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+html[data-theme-style="m3e"] .weather-widget:hover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+}
+html[data-theme-style="m3e"] .weather-temp {
+  color: var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .weather-location {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+html[data-theme-style="m3e"] .action-btn {
+  background-color: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+html[data-theme-style="m3e"] .action-btn:hover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-primary) !important;
+}
+
+/* 2. Time & Date Typography */
+html[data-theme-style="m3e"] .time-display {
+  font-family: var(--font-sans) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .date-display {
+  font-family: var(--font-sans) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+/* 3. Search Bar */
+html[data-theme-style="m3e"] .search-container {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0.85rem 1.45rem !important;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.14) !important;
+}
+html[data-theme-style="m3e"] .search-container:focus-within {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  box-shadow: var(--md-elevation-2) !important;
+}
+html[data-theme-style="m3e"] .search-icon {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+html[data-theme-style="m3e"] .search-input {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .search-input::placeholder {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  opacity: 0.8;
+}
+html[data-theme-style="m3e"] .kbd-badge {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+}
+
+/* Search Results & Shortcut Suggestions Dropdown in M3E */
+html[data-theme-style="m3e"] .search-dropdown {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: var(--md-elevation-3) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 0.5rem !important;
+  scrollbar-color: var(--md-sys-color-on-surface-variant) transparent !important;
+}
+html[data-theme-style="m3e"] .search-dropdown::-webkit-scrollbar-thumb {
+  background-color: var(--md-sys-color-on-surface-variant) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .search-dropdown.shortcuts-mode {
+  max-height: 260px !important;
+}
+html[data-theme-style="m3e"] .search-dropdown.shortcuts-mode .search-item {
+  padding: 0.55rem 0.85rem !important;
+  margin-bottom: 2px !important;
+}
+html[data-theme-style="m3e"] .search-dropdown.shortcuts-mode .search-item:last-child {
+  margin-bottom: 0 !important;
+}
+html[data-theme-style="m3e"] .search-item {
+  border-radius: var(--radius-2xl) !important;
+  padding: 0.55rem 0.85rem !important;
+  color: var(--md-sys-color-on-surface) !important;
+  transition: all 0.15s ease !important;
+  margin-bottom: 2px !important;
+}
+html[data-theme-style="m3e"] .search-item.selected,
+html[data-theme-style="m3e"] .search-item:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .search-item-title {
+  color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+}
+html[data-theme-style="m3e"] .search-item-url {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  font-size: 0.76rem !important;
+}
+html[data-theme-style="m3e"] .search-item-hint {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  font-size: 0.75rem !important;
+}
+html[data-theme-style="m3e"] .shortcut-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  color: var(--md-sys-color-primary) !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  border: none !important;
+  padding: 0.2rem 0.65rem !important;
+  border-radius: var(--radius-full) !important;
+  min-width: 3.2rem !important;
+  text-align: center !important;
+  transition: all 0.15s ease !important;
+}
+html[data-theme-style="m3e"] .search-item.selected .shortcut-tag,
+html[data-theme-style="m3e"] .search-item:hover .shortcut-tag {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border: none !important;
+}
+
+/* 4. Quick Bar (Favorites) */
+html[data-theme-style="m3e"] .quickbar-container {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0.6rem 0.85rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+html[data-theme-style="m3e"] .quick-pill {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  padding: 0.45rem 0.95rem !important;
+  box-shadow: none !important;
+}
+html[data-theme-style="m3e"] .quick-pill:hover {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+
+/* 5. Bookmark Folder Cards */
+html[data-theme-style="m3e"] .bookmark-card {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: none !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+html[data-theme-style="m3e"] .bookmark-card:hover {
+  box-shadow: var(--md-elevation-3) !important;
+  transform: translateY(-2px);
+}
+html[data-theme-style="m3e"] .bookmark-card.collapsed {
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .bookmark-card .card-header {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+  padding: 0.9rem 1.1rem !important;
+}
+html[data-theme-style="m3e"] .bookmark-card.collapsed .card-header {
+  border-bottom: none !important;
+}
+html[data-theme-style="m3e"] .card-title {
+  color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+}
+html[data-theme-style="m3e"] .card-emoji-btn {
+  background: var(--md-sys-color-surface-container-high) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  width: 34px !important;
+  height: 34px !important;
+}
+html[data-theme-style="m3e"] .card-count {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .card-collapse-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .card-collapse-btn:hover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .card-links-container {
+  background-color: transparent !important;
+}
+html[data-theme-style="m3e"] .bookmark-link {
+  border-radius: var(--radius-lg) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .bookmark-link:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+/* 6. Theme Menu Popover & Mode Segmented Pill */
+html[data-theme-style="m3e"] .theme-menu-popover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-2xl) !important;
+  box-shadow: var(--md-elevation-3) !important;
+  font-family: var(--font-sans) !important;
+}
+html[data-theme-style="m3e"] .theme-menu-title {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+html[data-theme-style="m3e"] .theme-mode-row {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border-radius: var(--radius-full) !important;
+  padding: 4px !important;
+  gap: 3px !important;
+}
+html[data-theme-style="m3e"] .theme-mode-btn {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .theme-mode-btn:hover {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .theme-mode-btn.active {
+  background: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-theme-style="m3e"] .palette-chip {
+  background: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-radius: var(--radius-xl) !important;
+}
+html[data-theme-style="m3e"] .palette-chip:hover {
+  background: var(--md-sys-color-surface-container-highest) !important;
+}
+html[data-theme-style="m3e"] .palette-chip.active {
+  background: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+
+/* 7. Dialogs, Modals, Forms & Inputs */
+html[data-theme-style="m3e"] .modal-dialog {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: none !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: var(--md-elevation-4) !important;
+  isolation: isolate !important;
+  contain: paint !important;
+}
+html[data-theme-style="m3e"] .modal-body {
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent !important;
+  will-change: scroll-position !important;
+  transform: translateZ(0) !important;
+  contain: content !important;
+}
+html[data-theme-style="m3e"] .modal-body::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .modal-header {
+  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .modal-footer {
+  border-top: 1px solid var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .modal-title {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .modal-close-btn {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .modal-close-btn:hover {
+  background-color: var(--md-sys-color-surface-container) !important;
+}
+html[data-theme-style="m3e"] .settings-section {
+  border-bottom: none !important;
+}
+html[data-theme-style="m3e"] .settings-divider {
+  border: none !important;
+  border-top: 1px solid var(--md-sys-color-outline-variant) !important;
+  opacity: 0.35;
+  margin: 0.75rem 0;
+}
+html[data-theme-style="m3e"] .settings-section-title {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .settings-section-desc {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+html[data-theme-style="m3e"] .form-label {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .form-hint {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+html[data-theme-style="m3e"] .form-input {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-full) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .form-input:focus {
+  border-color: var(--md-sys-color-primary) !important;
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary-container) !important;
+}
+
+/* Custom Dropdowns */
+html[data-theme-style="m3e"] .custom-select-trigger {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-full) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .custom-select-menu {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-2xl) !important;
+  box-shadow: var(--md-elevation-3) !important;
+}
+html[data-theme-style="m3e"] .custom-select-option {
+  border-radius: var(--radius-full) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .custom-select-option:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+html[data-theme-style="m3e"] .custom-select-option.selected {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+
+/* Primary & Secondary Buttons */
+html[data-theme-style="m3e"] .btn-primary {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .btn-primary:hover {
+  opacity: 0.92;
+}
+html[data-theme-style="m3e"] .btn-secondary {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .btn-secondary:hover {
+  background-color: var(--md-sys-color-surface-container) !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item,
+html[data-theme-style="m3e"] .engine-row {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-2xl) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  padding: 0.55rem 0.85rem !important;
+  transition: all 0.15s ease !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item:hover,
+html[data-theme-style="m3e"] .engine-row:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item .search-item-title {
+  color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item .search-item-url {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  font-size: 0.76rem !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item .shortcut-tag {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item:hover .shortcut-tag {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border: none !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item .settings-shortcut-delete-btn {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-full) !important;
+  font-size: 0.76rem !important;
+  padding: 0.3rem 0.75rem !important;
+  font-weight: 500 !important;
+  transition: all 0.18s ease !important;
+}
+html[data-theme-style="m3e"] .settings-shortcut-item .settings-shortcut-delete-btn:hover {
+  background-color: var(--md-sys-color-error-container) !important;
+  color: var(--md-sys-color-on-error-container) !important;
+  border-color: var(--md-sys-color-error) !important;
+}
+
+/* 8. Notes App M3E */
+html[data-theme-style="m3e"] .notes-container {
+  background-color: var(--md-sys-color-surface-container-low) !important;
+}
+html[data-theme-style="m3e"] .notes-header {
+  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .back-btn {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-radius: var(--radius-full) !important;
+  box-shadow: none !important;
+}
+html[data-theme-style="m3e"] .back-btn:hover {
+  background-color: var(--md-sys-color-surface-container) !important;
+  transform: translateY(-1px);
+}
+html[data-theme-style="m3e"] .notes-search-input {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .notes-search-input:focus {
+  border-color: var(--md-sys-color-primary) !important;
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary-container) !important;
+}
+html[data-theme-style="m3e"] .section-heading {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  font-family: var(--font-sans) !important;
+}
+html[data-theme-style="m3e"] .note-card {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.16) !important;
+}
+html[data-theme-style="m3e"] .note-card:hover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  box-shadow: var(--md-elevation-3) !important;
+}
+html[data-theme-style="m3e"] .note-card-title {
+  color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+}
+html[data-theme-style="m3e"] .note-card-body {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+html[data-theme-style="m3e"] .note-card-footer {
+  color: var(--md-sys-color-on-surface-variant) !important;
+  border-top-color: var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .pin-badge {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .note-creator {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-3xl) !important;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.16) !important;
+}
+html[data-theme-style="m3e"] .note-creator:focus-within {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  box-shadow: var(--md-elevation-3) !important;
+}
+html[data-theme-style="m3e"] .creator-title-input {
+  color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+}
+html[data-theme-style="m3e"] .creator-body-input {
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .creator-actions {
+  border-top-color: var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .creator-guide-link {
+  color: var(--md-sys-color-primary) !important;
+  border-radius: var(--radius-full) !important;
+}
+html[data-theme-style="m3e"] .creator-guide-link:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .md-task-checkbox {
+  border-color: var(--md-sys-color-outline) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border-radius: 3.5px !important;
+}
+html[data-theme-style="m3e"] .md-task-checkbox:checked {
+  background-color: var(--md-sys-color-primary) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .md-task-checkbox:checked::before {
+  border-left-color: var(--md-sys-color-on-primary) !important;
+  border-bottom-color: var(--md-sys-color-on-primary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   General Base & Utility Styles
+   -------------------------------------------------------------------------- */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -86,7 +937,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   min-height: 100vh;
@@ -113,7 +964,7 @@ body {
   background: hsl(var(--muted-foreground) / 0.45);
 }
 
-/* Standard Button Components for both NewTab and Notes */
+/* Standard Button Components */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -159,7 +1010,7 @@ body {
   color: hsl(var(--destructive-foreground));
 }
 
-/* Lucide SVG Icon helper */
+/* SVG Icon helper */
 .icon {
   display: inline-block;
   vertical-align: middle;
