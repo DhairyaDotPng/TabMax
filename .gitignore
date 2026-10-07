@@ -16,3 +16,5 @@ desktop.ini
 *.log
 scratch/
 .system_generated/
+tabmax-*/
+tabmax-neo/

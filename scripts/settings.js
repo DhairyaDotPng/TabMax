@@ -4,7 +4,7 @@ import { getCustomEngines, saveCustomEngines } from './search.js';
 import { fetchWeather } from './weather.js';
 
 // Available palettes metadata for visual indicators
-export const PALETTE_COLORS = {
+export const PALETTE_COLORS_M3E = {
   indigo: '#4050b5',
   ocean: '#006877',
   emerald: '#1e6b41',
@@ -13,14 +13,36 @@ export const PALETTE_COLORS = {
   violet: '#684ca0'
 };
 
-export const PALETTE_NAMES = {
+export const PALETTE_NAMES_M3E = {
   indigo: 'Indigo (Default M3)',
   ocean: 'Ocean (Teal / Cyan)',
   emerald: 'Emerald (Botanical Sage)',
   rose: 'Rose (Warm Coral)',
-  amber: 'Golden Amber (Honey)',
+  amber: 'Amber (Golden Honey)',
   violet: 'Violet (Lavender / Magenta)'
 };
+
+export const PALETTE_COLORS_NEO = {
+  indigo: '#FFD23F',
+  ocean: '#74B9FF',
+  emerald: '#88D498',
+  rose: '#FF6B6B',
+  amber: '#FFA552',
+  violet: '#B8A9FA'
+};
+
+export const PALETTE_NAMES_NEO = {
+  indigo: 'Bold Yellow',
+  ocean: 'Sky Blue',
+  emerald: 'Soft Green',
+  rose: 'Coral Pink',
+  amber: 'Orange',
+  violet: 'Lavender'
+};
+
+// Backwards compatibility aliases
+export const PALETTE_COLORS = PALETTE_COLORS_M3E;
+export const PALETTE_NAMES = PALETTE_NAMES_M3E;
 
 let themeStyleController = null;
 let popoverThemeStyleController = null;
@@ -57,8 +79,49 @@ export function initTheme() {
   setupThemeMenu();
 }
 
+export function updatePaletteUI(themeStyle, activePalette) {
+  const isNeo = themeStyle === 'neo';
+  const colors = isNeo ? PALETTE_COLORS_NEO : PALETTE_COLORS_M3E;
+  const names = isNeo ? PALETTE_NAMES_NEO : PALETTE_NAMES_M3E;
+  const currentPal = colors[activePalette] ? activePalette : 'indigo';
+
+  // 1. Update options in settings dropdown (#custom-select-palette)
+  document.querySelectorAll('#custom-select-palette .custom-select-option').forEach(opt => {
+    const val = opt.dataset.value;
+    if (val && colors[val]) {
+      const dot = opt.querySelector('.palette-color-dot');
+      if (dot) dot.style.backgroundColor = colors[val];
+      const nameSpan = opt.querySelector('span:not(.palette-color-dot)');
+      if (nameSpan) nameSpan.textContent = names[val] || val;
+    }
+  });
+
+  // 2. Update chips in popover (#popover-accent-section)
+  document.querySelectorAll('#popover-accent-section .palette-chip').forEach(chip => {
+    const val = chip.dataset.selectPalette || chip.dataset.palette;
+    if (val && colors[val]) {
+      const dot = chip.querySelector('.palette-color-dot');
+      if (dot) dot.style.backgroundColor = colors[val];
+      const nameSpan = chip.querySelector('.palette-chip-name');
+      if (nameSpan) nameSpan.textContent = names[val] || val;
+      chip.title = names[val] || val;
+      chip.classList.toggle('active', val === currentPal);
+    }
+  });
+
+  // 3. Update settings trigger dot and label
+  const triggerDot = document.getElementById('custom-select-palette-dot');
+  if (triggerDot && colors[currentPal]) {
+    triggerDot.style.backgroundColor = colors[currentPal];
+  }
+  const triggerLabel = document.querySelector('#custom-select-palette .custom-select-label');
+  if (triggerLabel && names[currentPal]) {
+    triggerLabel.textContent = names[currentPal];
+  }
+}
+
 export function applyThemeStyle(style) {
-  const validStyle = style === 'm3e' ? 'm3e' : 'default';
+  const validStyle = (style === 'm3e' || style === 'neo') ? style : 'default';
   document.documentElement.setAttribute('data-theme-style', validStyle);
   localStorage.setItem('tabmax_theme_style', validStyle);
 
@@ -75,19 +138,25 @@ export function applyThemeStyle(style) {
   // Show/Hide accent palette selector in settings based on theme
   const accentGroup = document.getElementById('settings-accent-group');
   if (accentGroup) {
-    accentGroup.style.display = validStyle === 'm3e' ? 'flex' : 'none';
+    accentGroup.style.display = (validStyle === 'm3e' || validStyle === 'neo') ? 'flex' : 'none';
   }
 
   // Show/Hide accent section in header popover
   const popoverAccentSection = document.getElementById('popover-accent-section');
   if (popoverAccentSection) {
-    popoverAccentSection.style.display = validStyle === 'm3e' ? 'block' : 'none';
+    popoverAccentSection.style.display = (validStyle === 'm3e' || validStyle === 'neo') ? 'block' : 'none';
   }
+
+  // Synchronize palette UI (dots & labels) for the active theme
+  const currentPalette = localStorage.getItem('tabmax_theme_palette') || 'indigo';
+  updatePaletteUI(validStyle, currentPalette);
 
   // If user hasn't set an explicit custom font, switch to theme's native default font
   const savedCustomFont = localStorage.getItem('tabmax_custom_font');
   if (!savedCustomFont) {
     resetFontToThemeDefault(validStyle);
+  } else {
+    applyFont(savedCustomFont, false);
   }
 }
 
@@ -118,21 +187,13 @@ export function setupModeButtons() {
 }
 
 export function applyThemePalette(palette) {
-  const validPalette = PALETTE_COLORS[palette] ? palette : 'indigo';
+  const validPalette = PALETTE_COLORS_M3E[palette] ? palette : 'indigo';
   document.documentElement.setAttribute('data-palette', validPalette);
   localStorage.setItem('tabmax_theme_palette', validPalette);
 
-  // Update chips in popover
-  document.querySelectorAll('.palette-chip').forEach(chip => {
-    const chipPalette = chip.dataset.selectPalette || chip.dataset.palette;
-    chip.classList.toggle('active', chipPalette === validPalette);
-  });
+  const currentStyle = localStorage.getItem('tabmax_theme_style') || 'default';
+  updatePaletteUI(currentStyle, validPalette);
 
-  // Update settings dropdown visual dot & value
-  const dot = document.getElementById('custom-select-palette-dot');
-  if (dot && PALETTE_COLORS[validPalette]) {
-    dot.style.backgroundColor = PALETTE_COLORS[validPalette];
-  }
   if (paletteController) {
     paletteController.setValue(validPalette);
   }
@@ -151,10 +212,32 @@ export function applyFont(fontName, persist = true) {
   loadGoogleFont(trimmed);
 
   // Apply to CSS variables and document with theme fallback
-  const fallback = currentStyle === 'm3e' ? 'var(--font-default-m3e)' : 'var(--font-default-shadcn)';
+  const fallback = currentStyle === 'neo'
+    ? 'var(--font-default-neo)'
+    : currentStyle === 'm3e'
+      ? 'var(--font-default-m3e)'
+      : 'var(--font-default-shadcn)';
   const fontStack = `"${trimmed}", ${fallback}`;
   document.documentElement.style.setProperty('--font-sans', fontStack);
+  document.documentElement.style.setProperty('--font-display-neo', fontStack);
+  document.documentElement.style.setProperty('--font-mono', fontStack);
   document.body.style.fontFamily = fontStack;
+
+  // Sync inputs across settings modal and theme popover
+  const settingInput = document.getElementById('setting-custom-font');
+  if (settingInput && settingInput.value !== trimmed) {
+    settingInput.value = trimmed;
+  }
+  const popoverInput = document.getElementById('popover-custom-font');
+  if (popoverInput && popoverInput.value !== trimmed) {
+    popoverInput.value = trimmed;
+  }
+
+  const msg = document.getElementById('font-status-msg');
+  if (msg) {
+    msg.textContent = `Applied font: "${trimmed}".`;
+    msg.style.color = 'hsl(var(--primary))';
+  }
 
   if (persist) {
     localStorage.setItem('tabmax_custom_font', trimmed);
@@ -163,18 +246,29 @@ export function applyFont(fontName, persist = true) {
 
 export function resetFontToThemeDefault(themeStyle) {
   localStorage.removeItem('tabmax_custom_font');
-  const targetFont = themeStyle === 'm3e' ? 'var(--font-default-m3e)' : 'var(--font-default-shadcn)';
-  document.documentElement.style.setProperty('--font-sans', targetFont);
-  document.body.style.fontFamily = targetFont;
+  document.documentElement.style.removeProperty('--font-sans');
+  document.documentElement.style.removeProperty('--font-display-neo');
+  document.documentElement.style.removeProperty('--font-mono');
+  document.body.style.fontFamily = '';
 
-  const input = document.getElementById('setting-custom-font');
-  if (input) {
-    input.value = '';
+  let defaultName = 'Inter';
+  if (themeStyle === 'm3e') {
+    defaultName = 'Google Sans';
+  } else if (themeStyle === 'neo') {
+    defaultName = 'Space Grotesk';
+  }
+
+  const settingInput = document.getElementById('setting-custom-font');
+  if (settingInput) {
+    settingInput.value = '';
+  }
+  const popoverInput = document.getElementById('popover-custom-font');
+  if (popoverInput) {
+    popoverInput.value = '';
   }
 
   const msg = document.getElementById('font-status-msg');
   if (msg) {
-    const defaultName = themeStyle === 'm3e' ? 'Google Sans' : 'Inter';
     msg.textContent = `Using default font: ${defaultName}.`;
     msg.style.color = 'hsl(var(--muted-foreground))';
   }
@@ -203,9 +297,50 @@ export function setupThemeMenu() {
     applyThemeStyle(val);
   });
 
+  // Font controls inside popover
+  const popoverFontInput = document.getElementById('popover-custom-font');
+  const popoverFontApplyBtn = document.getElementById('popover-font-apply-btn');
+  const popoverFontResetBtn = document.getElementById('popover-font-reset-btn');
+
+  if (popoverFontInput) {
+    popoverFontInput.value = localStorage.getItem('tabmax_custom_font') || '';
+    popoverFontInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (popoverFontApplyBtn) popoverFontApplyBtn.click();
+      }
+    };
+  }
+
+  if (popoverFontApplyBtn && popoverFontInput) {
+    popoverFontApplyBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const val = popoverFontInput.value.trim();
+      if (!val) {
+        resetFontToThemeDefault(localStorage.getItem('tabmax_theme_style') || 'default');
+      } else {
+        applyFont(val, true);
+      }
+    };
+  }
+
+  if (popoverFontResetBtn) {
+    popoverFontResetBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      resetFontToThemeDefault(localStorage.getItem('tabmax_theme_style') || 'default');
+    };
+  }
+
   menuBtn.onclick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const willOpen = !popover.classList.contains('active');
+    if (willOpen && popoverFontInput) {
+      popoverFontInput.value = localStorage.getItem('tabmax_custom_font') || '';
+    }
     popover.classList.toggle('active');
   };
 
@@ -252,8 +387,14 @@ export function initCustomSelect(containerId, initialValue, onChange) {
       opt.classList.toggle('selected', isSelected);
       if (isSelected && label) {
         // Extract plain text label (ignoring dot element text)
-        const textNode = Array.from(opt.childNodes).find(n => n.nodeType === Node.TEXT_NODE || n.tagName === 'SPAN');
-        label.textContent = textNode ? textNode.textContent.trim() : opt.textContent.trim();
+        const nameSpan = opt.querySelector('span:not(.palette-color-dot)');
+        if (nameSpan && nameSpan.textContent.trim()) {
+          label.textContent = nameSpan.textContent.trim();
+        } else {
+          const textNodes = Array.from(opt.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+          const text = textNodes.map(n => n.textContent.trim()).join(' ').trim();
+          label.textContent = text || opt.textContent.trim();
+        }
       }
     });
   }
@@ -404,6 +545,14 @@ export function setupSettingsModal(onSettingsSaved) {
 
   // Font customization handlers
   if (fontApplyBtn && fontInput) {
+    fontInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        fontApplyBtn.click();
+      }
+    };
+
     fontApplyBtn.onclick = () => {
       const font = fontInput.value.trim();
       if (!font) {
@@ -446,12 +595,13 @@ export function setupSettingsModal(onSettingsSaved) {
 
     if (themeStyleController) themeStyleController.setValue(style);
     applyThemeMode(mode);
+    updatePaletteUI(style, pal);
     if (paletteController) paletteController.setValue(pal);
     if (unitController) unitController.setValue(unit);
 
     const accentGroup = document.getElementById('settings-accent-group');
     if (accentGroup) {
-      accentGroup.style.display = style === 'm3e' ? 'flex' : 'none';
+      accentGroup.style.display = (style === 'm3e' || style === 'neo') ? 'flex' : 'none';
     }
 
     if (weatherStatusMsg) weatherStatusMsg.textContent = '';

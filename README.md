@@ -11,8 +11,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Manifest-V3-black?style=flat-square" alt="Manifest V3">
-  <img src="https://img.shields.io/badge/UI-Shadcn%20%2B%20Material%203%20Expressive-black?style=flat-square" alt="Shadcn & Material 3 Expressive UI">
-  <img src="https://img.shields.io/badge/Typography-Inter%20%7C%20Google%20Sans-blue?style=flat-square" alt="Inter and Google Sans">
+  <img src="https://img.shields.io/badge/UI-Shadcn%20%2B%20M3E%20%2B%20Neobrutalism-black?style=flat-square" alt="Shadcn, Material 3 Expressive & Neobrutalism UI">
+  <img src="https://img.shields.io/badge/Typography-Inter%20%7C%20Google%20Sans%20%7C%20Space%20Grotesk-blue?style=flat-square" alt="Inter, Google Sans and Space Grotesk">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
 </p>
 
@@ -23,13 +23,17 @@
 - 🎨 **Multi-Theme Design System**:
   - **Default (Shadcn Zinc)**: Monochrome, minimalist aesthetic with crisp borders, clean rectangular radii, and neutral dark/light modes.
   - **Material 3 Expressive (M3E)**: Expressive Google Material Design with fluid pill shapes, tonal elevation surfaces, and dynamic accent palettes.
-  - **Color Mode Selector**: Segmented toggle for Light, Dark, and Auto (System OS) modes.
-  - **6 Accent Palettes (M3E)**: Indigo, Ocean (Teal), Emerald (Sage), Rose (Coral), Golden Amber, and Violet (Lavender) with live visual color previews in settings and header popover.
-  - **Dynamic Google Fonts & Local Fonts**: One-click default font reset (Inter for Shadcn, Google Sans for M3E) or enter any Google Font (e.g. Poppins, Outfit, Roboto) for instant typography loading.
+  - **Neobrutalism (Neo)**: High-contrast, bold retro aesthetic featuring thick black outlines, tactile drop shadows, square toggle knobs, and authentic Neubrutalist pop palettes.
+  - **Color Mode Selector**: Segmented toggle for Light, Dark, and Auto (System OS) modes across all themes.
+  - **Dynamic Theme-Specific Accent Palettes**:
+    - *M3E Palettes*: Indigo, Ocean (Teal), Emerald (Sage), Rose (Coral), Amber, and Violet.
+    - *Neo Palettes*: Bold Yellow, Sky Blue, Soft Green, Coral Pink, Orange, and Lavender.
+    - Live visual color dots, synced dropdown triggers, and reactive palette chips in settings and the top-bar menu.
+  - **Universal Custom Typography & Dual Font Selectors**: Enter any Google Font (e.g. Poppins, Outfit, Lexend, Roboto) or local font with instant application across all elements. Includes one-click theme default resets (Inter for Shadcn, Google Sans for M3E, Space Grotesk for Neo) accessible directly from **both** the Settings menu and the Top-Bar Theme popover.
 - ⚙️ **Re-imagined & Categorized Settings Menu**:
   - Neatly organized into 4 dedicated sections: **Appearance**, **Weather Settings**, **Search Engine & Shortcut Settings**, and **General Settings**.
   - **Hardware-Accelerated Smooth Scrolling**: Isolated compositor layers and GPU hardware acceleration delivering silky-smooth 60 FPS scrolling.
-  - Top-bar quick appearance popover menu for rapid theme, mode, and accent switching on the fly.
+  - Top-bar quick appearance popover menu for rapid theme, mode, accent, and font switching on the fly.
 - ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme switcher popover, and live weather widget powered by Open-Meteo API.
 - 📌 **Auto-Wrapping Quick Bar with Long-Press Reordering**:
   - Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar, automatically wrapping across multiple rows.

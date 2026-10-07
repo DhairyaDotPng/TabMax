@@ -1,15 +1,17 @@
 /* ==========================================================================
    TabMax - Unified Multi-Theme & Design System Tokens
-   Supports: Default (Shadcn Pure Zinc) & Material 3 Expressive (M3E)
+   Supports: Default (Shadcn Pure Zinc), Material 3 Expressive (M3E), Neobrutalism (Neo)
    Dynamic Google Fonts & Local Fallbacks
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;600;700&family=Product+Sans:wght@400;700&family=Open+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;600;700&family=Product+Sans:wght@400;700&family=Open+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=Archivo+Black&display=swap');
 
 :root {
   /* Dynamic font variables */
   --font-default-shadcn: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-default-m3e: 'Google Sans', 'Google Sans Text', 'Product Sans', 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-default-neo: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display-neo: var(--font-sans);
   --font-sans: var(--font-default-shadcn);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
@@ -756,6 +758,9 @@ html[data-theme-style="m3e"] .custom-select-option.selected {
   background-color: var(--md-sys-color-primary-container) !important;
   color: var(--md-sys-color-on-primary-container) !important;
 }
+html[data-theme-style="m3e"] #custom-select-palette-dot {
+  background-color: var(--md-sys-color-primary) !important;
+}
 
 /* Primary & Secondary Buttons */
 html[data-theme-style="m3e"] .btn-primary {
@@ -1021,4 +1026,975 @@ body {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* ==========================================================================
+   THEME 3: NEOBRUTALISM (Neo Theme)
+   Reference & Spec: https://neubrutalism.com/
+   Key visual traits:
+   - 3px solid #000 borders
+   - Hard offset shadows with zero blur (3px, 5px, 8px)
+   - Square corners (border-radius: 0)
+   - Flat categorical pop fills: Cyber Yellow (#FFD23F), Coral Pink (#FF6B6B),
+     Sky Blue (#74B9FF), Mint Green (#88D498), Tangerine (#FFA552), Lavender (#B8A9FA)
+   - Tactile button press physics (translate down-right into shadow)
+   - Punchy typography (Space Grotesk + Space Mono)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Neo Base Tokens (Light Mode Default)
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] {
+  --font-sans: var(--font-default-neo);
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  --font-display-neo: var(--font-sans);
+
+  /* Canonical Neubrutalist Pop Palette */
+  --neo-bg: #FFFDF5;
+  --neo-card-bg: #FFFFFF;
+  --neo-border-color: #000000;
+  --neo-shadow-color: #000000;
+  --neo-text: #000000;
+  --neo-text-muted: #444444;
+
+  --neo-yellow: #FFD23F;
+  --neo-yellow-light: #FFF6D1;
+  --neo-pink: #FF6B6B;
+  --neo-pink-light: #FFE3E3;
+  --neo-cyan: #74B9FF;
+  --neo-cyan-light: #E1F0FF;
+  --neo-green: #88D498;
+  --neo-green-light: #E2F7E8;
+  --neo-orange: #FFA552;
+  --neo-orange-light: #FFF0E0;
+  --neo-purple: #B8A9FA;
+  --neo-purple-light: #F0EBFE;
+
+  /* Default Pop Accent */
+  --neo-accent: var(--neo-yellow);
+  --neo-accent-light: var(--neo-yellow-light);
+
+  /* Radius: Canonical Neubrutalist Square (0px) */
+  --radius-xs: 0px !important;
+  --radius-sm: 0px !important;
+  --radius-md: 0px !important;
+  --radius-lg: 0px !important;
+  --radius-xl: 0px !important;
+  --radius-2xl: 0px !important;
+  --radius-3xl: 0px !important;
+  --radius-full: 0px !important;
+
+  /* Hard Offset Shadows */
+  --shadow-subtle: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  --shadow-card: 5px 5px 0 0 var(--neo-shadow-color) !important;
+  --shadow-elevated: 7px 7px 0 0 var(--neo-shadow-color) !important;
+  --shadow-modal: 10px 10px 0 0 var(--neo-shadow-color) !important;
+
+  /* Theme variables override */
+  --background: 48 100% 98%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --card-border: 0 0% 0%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --primary: 45 100% 62%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 48 100% 95%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 48 35% 93%;
+  --muted-foreground: 0 0% 30%;
+  --accent: 45 100% 62%;
+  --accent-foreground: 0 0% 0%;
+}
+
+/* --------------------------------------------------------------------------
+   Neo Palette Overrides (Light Mode)
+   Adapts canvas background, accent, secondary & tertiary tints per palette
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"][data-palette="indigo"],
+html[data-theme-style="neo"][data-palette="yellow"] {
+  --neo-bg: #FFFDF5;
+  --neo-accent: var(--neo-yellow);
+  --neo-accent-light: var(--neo-yellow-light);
+  --background: 48 100% 98%;
+  --secondary: 48 100% 95%;
+  --muted: 48 35% 93%;
+  --primary: 45 100% 62%;
+}
+
+html[data-theme-style="neo"][data-palette="emerald"],
+html[data-theme-style="neo"][data-palette="green"] {
+  --neo-bg: #F4FAF6;
+  --neo-accent: var(--neo-green);
+  --neo-accent-light: var(--neo-green-light);
+  --background: 140 40% 97%;
+  --secondary: 135 60% 93%;
+  --muted: 135 25% 92%;
+  --primary: 132 47% 69%;
+}
+
+html[data-theme-style="neo"][data-palette="ocean"],
+html[data-theme-style="neo"][data-palette="cyan"] {
+  --neo-bg: #F2F8FF;
+  --neo-accent: var(--neo-cyan);
+  --neo-accent-light: var(--neo-cyan-light);
+  --background: 210 50% 98%;
+  --secondary: 210 75% 94%;
+  --muted: 210 30% 92%;
+  --primary: 210 100% 73%;
+}
+
+html[data-theme-style="neo"][data-palette="rose"],
+html[data-theme-style="neo"][data-palette="pink"] {
+  --neo-bg: #FFF5F5;
+  --neo-accent: var(--neo-pink);
+  --neo-accent-light: var(--neo-pink-light);
+  --background: 355 60% 98%;
+  --secondary: 355 80% 95%;
+  --muted: 355 30% 92%;
+  --primary: 0 100% 71%;
+}
+
+html[data-theme-style="neo"][data-palette="amber"],
+html[data-theme-style="neo"][data-palette="orange"] {
+  --neo-bg: #FFF9F2;
+  --neo-accent: var(--neo-orange);
+  --neo-accent-light: var(--neo-orange-light);
+  --background: 32 70% 98%;
+  --secondary: 32 85% 94%;
+  --muted: 32 30% 92%;
+  --primary: 29 100% 66%;
+}
+
+html[data-theme-style="neo"][data-palette="violet"],
+html[data-theme-style="neo"][data-palette="purple"] {
+  --neo-bg: #F8F5FF;
+  --neo-accent: var(--neo-purple);
+  --neo-accent-light: var(--neo-purple-light);
+  --background: 260 50% 98%;
+  --secondary: 260 70% 95%;
+  --muted: 260 30% 92%;
+  --primary: 251 89% 82%;
+}
+
+/* --------------------------------------------------------------------------
+   Neo Dark Mode: Inverted High-Contrast Neubrutalism
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"][data-theme="dark"] {
+  --neo-bg: #121215;
+  --neo-card-bg: #1B1B20;
+  --neo-border-color: #FFFFFF;
+  --neo-shadow-color: #FFFFFF;
+  --neo-text: #FFFFFF;
+  --neo-text-muted: #B8B8C2;
+
+  --neo-yellow-light: #2A2514;
+  --neo-pink-light: #2E181C;
+  --neo-cyan-light: #162432;
+  --neo-green-light: #18281C;
+  --neo-orange-light: #2E1E12;
+  --neo-purple-light: #251836;
+
+  --background: 240 7% 7%;
+  --foreground: 0 0% 100%;
+  --card: 240 8% 12%;
+  --card-foreground: 0 0% 100%;
+  --card-border: 0 0% 100%;
+  --border: 0 0% 100%;
+  --input: 0 0% 100%;
+  --secondary: 240 8% 18%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 240 8% 18%;
+  --muted-foreground: 0 0% 75%;
+
+  --shadow-subtle: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  --shadow-card: 5px 5px 0 0 var(--neo-shadow-color) !important;
+  --shadow-elevated: 7px 7px 0 0 var(--neo-shadow-color) !important;
+  --shadow-modal: 10px 10px 0 0 var(--neo-shadow-color) !important;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="indigo"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="yellow"] {
+  --neo-bg: #14130E;
+  --neo-card-bg: #1F1D15;
+  --neo-accent: #FFD23F;
+  --neo-accent-light: #2A2514;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="emerald"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="green"] {
+  --neo-bg: #0E1611;
+  --neo-card-bg: #16221A;
+  --neo-accent: #88D498;
+  --neo-accent-light: #18281C;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="ocean"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="cyan"] {
+  --neo-bg: #0D151E;
+  --neo-card-bg: #14202E;
+  --neo-accent: #74B9FF;
+  --neo-accent-light: #162432;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="rose"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="pink"] {
+  --neo-bg: #180F12;
+  --neo-card-bg: #26161B;
+  --neo-accent: #FF6B6B;
+  --neo-accent-light: #2E181C;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="amber"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="orange"] {
+  --neo-bg: #17110B;
+  --neo-card-bg: #241A12;
+  --neo-accent: #FFA552;
+  --neo-accent-light: #2E1E12;
+}
+
+html[data-theme-style="neo"][data-theme="dark"][data-palette="violet"],
+html[data-theme-style="neo"][data-theme="dark"][data-palette="purple"] {
+  --neo-bg: #140E1E;
+  --neo-card-bg: #20172F;
+  --neo-accent: #B8A9FA;
+  --neo-accent-light: #251836;
+}
+
+/* --------------------------------------------------------------------------
+   1. Base & Layout Elements
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] body {
+  background-color: var(--neo-bg) !important;
+  color: var(--neo-text) !important;
+  font-family: var(--font-sans) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Header & Clock & Weather
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .time-display {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.04em !important;
+  color: var(--neo-text) !important;
+}
+
+html[data-theme-style="neo"] .date-display {
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--neo-text-muted) !important;
+}
+
+html[data-theme-style="neo"] .weather-widget {
+  background-color: var(--neo-accent) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-family: var(--font-mono) !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+html[data-theme-style="neo"] .weather-widget:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .weather-widget:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .weather-location {
+  color: #000000 !important;
+  opacity: 0.85;
+}
+
+html[data-theme-style="neo"] .action-btn {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s !important;
+}
+html[data-theme-style="neo"] .action-btn:hover {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .action-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 0 var(--neo-shadow-color) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Search Container, Suggestions & Badges
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .search-container {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0.75rem 1.15rem !important;
+  transition: outline 0.15s ease !important;
+}
+html[data-theme-style="neo"] .search-container:focus-within {
+  transform: none !important;
+  box-shadow: none !important;
+  outline: 3px solid var(--neo-accent) !important;
+  outline-offset: 2px !important;
+}
+html[data-theme-style="neo"] .search-input {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 1.05rem !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .search-icon {
+  color: var(--neo-text) !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Engine Active Badge */
+html[data-theme-style="neo"] .engine-badge {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  padding: 0.22rem 0.6rem !important;
+}
+
+/* Search Dropdown */
+html[data-theme-style="neo"] .search-dropdown {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0.5rem !important;
+}
+html[data-theme-style="neo"] .search-item {
+  border-radius: 0 !important;
+  border: 2px solid transparent !important;
+  padding: 0.6rem 0.85rem !important;
+  color: var(--neo-text) !important;
+  transition: all 0.1s ease !important;
+}
+html[data-theme-style="neo"] .search-item.selected,
+html[data-theme-style="neo"] .search-item:hover {
+  background-color: var(--neo-accent-light) !important;
+  border-color: var(--neo-border-color) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .search-item-title {
+  font-weight: 700 !important;
+  font-family: var(--font-sans) !important;
+}
+html[data-theme-style="neo"] .search-item-url {
+  font-family: var(--font-mono) !important;
+  font-size: 0.74rem !important;
+  opacity: 0.75;
+}
+html[data-theme-style="neo"] .search-item-hint {
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Search Shortcut Tag */
+html[data-theme-style="neo"] .shortcut-tag {
+  background-color: var(--neo-accent-light) !important;
+  color: var(--neo-text) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+}
+html[data-theme-style="neo"] .search-item.selected .shortcut-tag,
+html[data-theme-style="neo"] .search-item:hover .shortcut-tag {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Quick Bar (Favourites)
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .quickbar-container {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0.85rem 1rem !important;
+}
+html[data-theme-style="neo"] .quick-pill {
+  background-color: var(--neo-accent-light) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2.5px 2.5px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  padding: 0.35rem 0.75rem !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s !important;
+}
+html[data-theme-style="neo"] .quick-pill:hover {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .quick-pill:active {
+  transform: translate(1.5px, 1.5px) !important;
+  box-shadow: 0.5px 0.5px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .quick-pill.is-dragging {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Folder Cards & Bookmarks Grid
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .bookmark-card {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  transition: border-color 0.15s ease !important;
+}
+html[data-theme-style="neo"] .bookmark-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+html[data-theme-style="neo"] .bookmark-card .card-header {
+  background-color: var(--neo-card-bg) !important;
+  border-bottom: 2.5px solid var(--neo-border-color) !important;
+  color: var(--neo-text) !important;
+  padding: 0.65rem 0.85rem !important;
+}
+html[data-theme-style="neo"] .bookmark-card.collapsed .card-header {
+  border-bottom: none !important;
+}
+html[data-theme-style="neo"] .card-title {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--neo-text) !important;
+  font-size: 0.95rem !important;
+}
+html[data-theme-style="neo"] .card-count {
+  background-color: var(--neo-accent-light) !important;
+  color: var(--neo-text) !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 1px 1px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+  padding: 0.15rem 0.45rem !important;
+}
+html[data-theme-style="neo"] .card-collapse-btn {
+  background: transparent !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  transition: background-color 0.12s, color 0.12s !important;
+}
+html[data-theme-style="neo"] .card-collapse-btn:hover {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .card-emoji-btn {
+  border-radius: 0 !important;
+  transition: background-color 0.12s !important;
+}
+html[data-theme-style="neo"] .card-emoji-btn:hover {
+  background-color: var(--neo-accent-light) !important;
+}
+
+/* Bookmarks inside Folder Cards (Tactile Hard Drop Shadow) */
+html[data-theme-style="neo"] .bookmark-link {
+  background-color: var(--neo-card-bg) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2.5px 2.5px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.35rem !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s !important;
+}
+html[data-theme-style="neo"] .bookmark-link:hover {
+  background-color: var(--neo-accent-light) !important;
+  border-color: var(--neo-border-color) !important;
+  transform: translate(-1.5px, -1.5px) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .bookmark-link:active {
+  transform: translate(1.5px, 1.5px) !important;
+  box-shadow: 0.5px 0.5px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .bookmark-drag-handle {
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .favicon-img {
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .favicon-fallback {
+  border-radius: 0 !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 800 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Buttons & Interactive Controls (Tactile Press)
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .btn {
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+}
+html[data-theme-style="neo"] .btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .btn-primary {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .btn-secondary {
+  background-color: var(--neo-card-bg) !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .btn-secondary:hover {
+  background-color: var(--neo-pink-light) !important;
+  color: #000000 !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Modals, Settings & Popovers
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .modal-dialog {
+  background-color: var(--neo-card-bg) !important;
+  border: 4px solid var(--neo-border-color) !important;
+  box-shadow: 10px 10px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .modal-header {
+  background-color: var(--neo-accent) !important;
+  border-bottom: 3.5px solid var(--neo-border-color) !important;
+  color: #000000 !important;
+  padding: 1rem 1.5rem !important;
+}
+html[data-theme-style="neo"] .modal-title {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  color: #000000 !important;
+  font-size: 1.15rem !important;
+}
+html[data-theme-style="neo"] .modal-close-btn {
+  background-color: #FFFFFF !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: 3px 3px 0 0 #000000 !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  transition: transform 0.1s ease !important;
+}
+html[data-theme-style="neo"] .modal-close-btn:hover {
+  background-color: var(--neo-pink) !important;
+  transform: translate(-1px, -1px) !important;
+}
+
+/* Section styling in settings */
+html[data-theme-style="neo"] .settings-section-title {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .settings-divider {
+  border-top: 3px solid var(--neo-border-color) !important;
+  opacity: 1 !important;
+  margin: 0.6rem 0 !important;
+}
+
+/* Form Inputs */
+html[data-theme-style="neo"] .form-input {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 600 !important;
+  transition: outline 0.12s ease !important;
+}
+html[data-theme-style="neo"] .form-input:focus {
+  outline: 3px solid var(--neo-accent) !important;
+  outline-offset: 1px !important;
+  box-shadow: none !important;
+}
+
+/* Custom Selects (Keep tactile shadow for weather unit & palette triggers) */
+html[data-theme-style="neo"] .custom-select-trigger {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: 3px 3px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 600 !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+}
+html[data-theme-style="neo"] .custom-select-trigger:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .custom-select-wrapper.open .custom-select-trigger {
+  outline: 3px solid var(--neo-accent) !important;
+  outline-offset: 1px !important;
+  box-shadow: 5px 5px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .custom-select-menu {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .custom-select-option {
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .custom-select-option:hover {
+  background-color: var(--neo-accent-light) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .custom-select-option.selected {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+/* Neobrutalist Toggle Switch (Square Track + Square Knob) */
+html[data-theme-style="neo"] .toggle-switch {
+  width: 44px !important;
+  height: 24px !important;
+}
+html[data-theme-style="neo"] .toggle-slider {
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  background-color: var(--neo-card-bg) !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+html[data-theme-style="neo"] .toggle-slider:before {
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+  height: 13px !important;
+  width: 13px !important;
+  left: 3px !important;
+  top: 3px !important;
+  bottom: auto !important;
+  background-color: #333333 !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease !important;
+}
+html[data-theme-style="neo"][data-theme="dark"] .toggle-slider:before {
+  background-color: #DDDDDD !important;
+}
+html[data-theme-style="neo"] .toggle-switch input:checked + .toggle-slider {
+  background-color: var(--neo-accent) !important;
+  border-color: var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px) !important;
+  background-color: #000000 !important;
+}
+html[data-theme-style="neo"][data-theme="dark"] .toggle-switch input:checked + .toggle-slider:before {
+  background-color: #FFFFFF !important;
+}
+
+/* Mode Switcher Segmented Block */
+html[data-theme-style="neo"] .theme-mode-row {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 3px !important;
+  gap: 3px !important;
+}
+html[data-theme-style="neo"] .theme-mode-btn {
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+  color: var(--neo-text) !important;
+  text-transform: uppercase !important;
+  font-size: 0.8rem !important;
+}
+html[data-theme-style="neo"] .theme-mode-btn.active {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+}
+
+/* Palette Chips in Popover */
+html[data-theme-style="neo"] .palette-chip {
+  background-color: var(--neo-card-bg) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .palette-chip:hover {
+  background-color: var(--neo-accent-light) !important;
+  transform: translate(-1px, -1px) !important;
+}
+html[data-theme-style="neo"] .palette-chip.active {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  box-shadow: 3px 3px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .palette-color-dot {
+  border-radius: 0 !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] #custom-select-palette-dot {
+  background-color: var(--neo-accent) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="indigo"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="indigo"] .palette-color-dot {
+  background: var(--neo-yellow) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="ocean"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="ocean"] .palette-color-dot {
+  background: var(--neo-cyan) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="emerald"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="emerald"] .palette-color-dot {
+  background: var(--neo-green) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="rose"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="rose"] .palette-color-dot {
+  background: var(--neo-pink) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="amber"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="amber"] .palette-color-dot {
+  background: var(--neo-orange) !important;
+}
+html[data-theme-style="neo"] .palette-chip[data-select-palette="violet"] .palette-color-dot,
+html[data-theme-style="neo"] #custom-select-palette .custom-select-option[data-value="violet"] .palette-color-dot {
+  background: var(--neo-purple) !important;
+}
+
+/* Shortcuts in Settings */
+html[data-theme-style="neo"] .settings-shortcut-item {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .settings-shortcut-item:hover {
+  background-color: var(--neo-card-bg) !important;
+}
+html[data-theme-style="neo"] .settings-shortcut-item .settings-shortcut-delete-btn {
+  background-color: var(--neo-pink) !important;
+  color: #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  font-weight: 800 !important;
+}
+html[data-theme-style="neo"] .settings-shortcut-item .settings-shortcut-delete-btn:hover {
+  background-color: #FF334B !important;
+  color: #FFFFFF !important;
+}
+
+/* Popover Dropdown (Top Bar) */
+html[data-theme-style="neo"] .theme-menu-popover {
+  background-color: var(--neo-card-bg) !important;
+  border: 3.5px solid var(--neo-border-color) !important;
+  box-shadow: 8px 8px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .theme-menu-title {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--neo-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Notes App Neubrutalism (notes.html)
+   -------------------------------------------------------------------------- */
+html[data-theme-style="neo"] .notes-container {
+  background-color: var(--neo-bg) !important;
+}
+html[data-theme-style="neo"] .notes-header {
+  border-bottom: 3.5px solid var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .back-btn {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+}
+html[data-theme-style="neo"] .back-btn:hover {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .back-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .notes-search-input {
+  background-color: var(--neo-card-bg) !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 600 !important;
+}
+html[data-theme-style="neo"] .notes-search-input:focus {
+  outline: 3px solid var(--neo-accent) !important;
+  box-shadow: none !important;
+}
+html[data-theme-style="neo"] .section-heading {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--neo-text) !important;
+}
+
+/* Note Creator */
+html[data-theme-style="neo"] .note-creator {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .creator-title-input {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 700 !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .creator-body-input {
+  font-family: var(--font-sans) !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .creator-actions {
+  border-top: 2.5px solid var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .creator-guide-link {
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  color: var(--neo-text) !important;
+  border-radius: 0 !important;
+}
+
+/* Note Cards */
+html[data-theme-style="neo"] .note-card {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+html[data-theme-style="neo"] .note-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 8px 8px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .note-card-title {
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .note-card-body {
+  color: var(--neo-text-muted) !important;
+}
+html[data-theme-style="neo"] .note-card-footer {
+  border-top: 2px solid var(--neo-border-color) !important;
+  color: var(--neo-text-muted) !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+}
+html[data-theme-style="neo"] .pin-badge {
+  background-color: var(--neo-accent) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+}
+
+/* Interactive Checkboxes in Markdown */
+html[data-theme-style="neo"] .md-task-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2.5px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  background-color: var(--neo-card-bg) !important;
+}
+html[data-theme-style="neo"] .md-task-checkbox:checked {
+  background-color: var(--neo-accent) !important;
+  border-color: var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .md-task-checkbox:checked::before {
+  border-left: 2.5px solid #000000 !important;
+  border-bottom: 2.5px solid #000000 !important;
+}
+
+/* Split-Screen Editor */
+html[data-theme-style="neo"] .editor-container {
+  background-color: var(--neo-card-bg) !important;
+  border: 4px solid var(--neo-border-color) !important;
+  box-shadow: 12px 12px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .editor-left {
+  border-right: 3px solid var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .guide-header-sticky {
+  background-color: var(--neo-accent) !important;
+  border-bottom: 3px solid var(--neo-border-color) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .guide-title {
+  color: #000000 !important;
+  font-family: var(--font-display-neo) !important;
+  font-weight: 800 !important;
 }
