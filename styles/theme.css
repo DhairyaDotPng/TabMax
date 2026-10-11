@@ -1391,11 +1391,12 @@ html[data-theme-style="neo"] .search-item.selected,
 html[data-theme-style="neo"] .search-item:hover {
   background-color: var(--neo-accent-light) !important;
   border-color: var(--neo-border-color) !important;
-  color: #000000 !important;
+  color: var(--neo-text) !important;
 }
 html[data-theme-style="neo"] .search-item-title {
   font-weight: 700 !important;
   font-family: var(--font-sans) !important;
+  color: var(--neo-text) !important;
 }
 html[data-theme-style="neo"] .search-item-url {
   font-family: var(--font-mono) !important;
@@ -1689,7 +1690,7 @@ html[data-theme-style="neo"] .custom-select-option {
 }
 html[data-theme-style="neo"] .custom-select-option:hover {
   background-color: var(--neo-accent-light) !important;
-  color: #000000 !important;
+  color: var(--neo-text) !important;
 }
 html[data-theme-style="neo"] .custom-select-option.selected {
   background-color: var(--neo-accent) !important;
