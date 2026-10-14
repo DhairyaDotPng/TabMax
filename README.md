@@ -1,7 +1,7 @@
 # 📁 TabMax
 
 <p align="center">
-  <img src="icons/icon-128.png" width="100" height="100" alt="TabMax Logo" />
+  <img src="screenshots/modes.png" alt="TabMax Light and Dark Mode Preview" width="100%" />
 </p>
 
 <p align="center">
@@ -30,10 +30,24 @@
     - *Neo Palettes*: Bold Yellow, Sky Blue, Soft Green, Coral Pink, Orange, and Lavender.
     - Live visual color dots, synced dropdown triggers, and reactive palette chips in settings and the top-bar menu.
   - **Universal Custom Typography & Dual Font Selectors**: Enter any Google Font (e.g. Poppins, Outfit, Lexend, Roboto) or local font with instant application across all elements. Includes one-click theme default resets (Inter for Shadcn, Google Sans for M3E, Space Grotesk for Neo) accessible directly from **both** the Settings menu and the Top-Bar Theme popover.
+
+  <p align="center">
+    <img src="screenshots/themes.png" alt="TabMax Multi-Theme Comparison (M3E, Shadcn, Neobrutalism)" width="100%" />
+  </p>
+
 - ⚙️ **Re-imagined & Categorized Settings Menu**:
   - Neatly organized into 4 dedicated sections: **Appearance**, **Weather Settings**, **Search Engine & Shortcut Settings**, and **General Settings**.
   - **Hardware-Accelerated Smooth Scrolling**: Isolated compositor layers and GPU hardware acceleration delivering silky-smooth 60 FPS scrolling.
   - Top-bar quick appearance popover menu for rapid theme, mode, accent, and font switching on the fly.
+
+  <p align="center">
+    <img src="screenshots/theme-menu.png" alt="Top-Bar Appearance Popover" width="31%" />
+    &nbsp;
+    <img src="screenshots/settings-1.png" alt="Settings - Appearance & Weather" width="32%" />
+    &nbsp;
+    <img src="screenshots/settings-2.png" alt="Settings - Shortcuts & General" width="32%" />
+  </p>
+
 - ⚡ **Minimalist Header**: Live 12-hour clock, formatted date, instant theme switcher popover, and live weather widget powered by Open-Meteo API.
 - 📌 **Auto-Wrapping Quick Bar with Long-Press Reordering**:
   - Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar, automatically wrapping across multiple rows.
@@ -58,10 +72,15 @@
   - `Ctrl + K` to immediately focus the search bar.
   - Manage and delete custom engines in Settings with beautiful prefix chips matching the search dropdown.
 - 📝 **Google Keep Style Markdown Notes with Full Parity**:
-  - Full-screen notes dashboard (`notes.html`) adapting dynamically to Shadcn and Material 3 Expressive themes.
+  - Full-screen notes dashboard (`notes.html`) adapting dynamically to Shadcn, Material 3 Expressive, and Neobrutalism themes.
   - Interactive markdown task lists (`- [ ]` / `- [x]`) with clickable checkboxes directly from the note cards.
   - Split-screen note editor with Live Markdown Preview and 25+ topic **Markdown Cheat-Sheet** available when creating new notes as well as editing existing ones.
   - Local directory sync support via the File System Access API.
+
+  <p align="center">
+    <img src="screenshots/notes.png" alt="TabMax Notes Dashboard" width="49%" />
+    <img src="screenshots/note-editor.png" alt="Split-Screen Markdown Editor & Cheatsheet" width="49%" />
+  </p>
 - 🔒 **100% Private & Local**: Zero analytics, zero trackers, zero external servers. Everything runs entirely within your browser and local machine.
 
 ---
@@ -135,9 +154,10 @@ TabMax/
 ├── manifest.json            # Manifest V3 extension configuration
 ├── newtab.html              # Main dashboard HTML
 ├── notes.html               # Markdown notes workspace HTML
+├── screenshots/             # Mockup previews and UI screenshots
 ├── icons/                   # Transparent PNG extension & favicon icons (16, 32, 48, 128)
 ├── styles/
-│   ├── theme.css            # Shadcn monochrome color tokens & Inter font
+│   ├── theme.css            # Multi-theme design tokens (Shadcn, M3E, Neo) & dynamic font management
 │   ├── newtab.css           # Dashboard layout, cards, context menu & modal styles
 │   └── notes.css            # Notes grid, split editor & cheatsheet styles
 ├── scripts/
