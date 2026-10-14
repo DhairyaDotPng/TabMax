@@ -71,6 +71,10 @@
   - **Instant Engine Pills**: Typing any shortcut (e.g. `/web`, `/git`, `/yt`) instantly turns into an engine pill badge, automatically clears the shortcut prefix text, and updates the placeholder to `Search <Engine>...`. Press <kbd>Backspace</kbd> or click <kbd>&times;</kbd> to easily exit engine mode.
   - `Ctrl + K` to immediately focus the search bar.
   - Manage and delete custom engines in Settings with beautiful prefix chips matching the search dropdown.
+
+  <p align="center">
+    <img src="screenshots/searchbar.png" alt="Search Bar with Interactive Shortcut Suggestions" width="60%" />
+  </p>
 - 📝 **Google Keep Style Markdown Notes with Full Parity**:
   - Full-screen notes dashboard (`notes.html`) adapting dynamically to Shadcn, Material 3 Expressive, and Neobrutalism themes.
   - Interactive markdown task lists (`- [ ]` / `- [x]`) with clickable checkboxes directly from the note cards.
