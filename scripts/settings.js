@@ -5,21 +5,21 @@ import { fetchWeather } from './weather.js';
 
 // Available palettes metadata for visual indicators
 export const PALETTE_COLORS_M3E = {
-  indigo: '#4050b5',
-  ocean: '#006877',
-  emerald: '#1e6b41',
-  rose: '#9b394f',
-  amber: '#7a5400',
-  violet: '#684ca0'
+  emerald: '#B3EE46', // Moss
+  amber: '#FFD07B',   // Sand
+  indigo: '#B8A9FF',  // Lavender (Default)
+  rose: '#B4532F',    // Coral
+  ocean: '#81DFA2',   // Ocean
+  violet: '#E0507F'   // Bubblegum
 };
 
 export const PALETTE_NAMES_M3E = {
-  indigo: 'Indigo (Default M3)',
-  ocean: 'Ocean (Teal / Cyan)',
-  emerald: 'Emerald (Botanical Sage)',
-  rose: 'Rose (Warm Coral)',
-  amber: 'Amber (Golden Honey)',
-  violet: 'Violet (Lavender / Magenta)'
+  emerald: 'Moss',
+  amber: 'Sand',
+  indigo: 'Lavender (Default M3)',
+  rose: 'Coral',
+  ocean: 'Ocean',
+  violet: 'Bubblegum'
 };
 
 export const PALETTE_COLORS_NEO = {

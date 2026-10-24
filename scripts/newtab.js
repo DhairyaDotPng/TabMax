@@ -128,7 +128,11 @@ async function refreshBookmarks() {
       const card = document.querySelector(`.bookmark-card[data-folder-id="${id}"]`);
       if (card) {
         const btn = card.querySelector('.card-emoji-btn');
-        if (btn) btn.textContent = newEmoji;
+        if (btn) {
+          const symbol = btn.querySelector('.emoji-symbol');
+          if (symbol) symbol.textContent = newEmoji;
+          else btn.textContent = newEmoji;
+        }
       }
     });
   });
