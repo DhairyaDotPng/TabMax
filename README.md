@@ -56,10 +56,14 @@
   - Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards.
   - **Folder Modes (Vertical List vs Horizontal List)**: Switch any folder card individually between the classic vertical list and the new horizontal list mode directly via the folder's right-click context menu.
   - **Custom Folder Widths**: In Horizontal List mode, configure each folder's card width to span **1 Column**, **2 Columns**, **3 Columns**, or the **Full Row**, with graceful responsive clamping on narrower screens.
+  - **Explicit Row-Based Grid & Empty Spaces**: Organize cards into dedicated rows (holding 1 to 4 columns each). Leave empty columns in any row without cards auto-packing awkwardly into spaces you want empty.
+  - **Free Column Placement & Dynamic Grid Snapping**: Place folder cards at any column position within a row (e.g. `folder - empty space - folder - empty space`). Dragging a card lifts it into a floating preview so its original slot acts as an immediate snap target, exposing grid snap guides across empty spots and dynamically snapping the active ghost placeholder to any hovered column.
+  - **"Start a new row" Dividers & Row Rebalancing**: Hovering between rows reveals an interactive dashed divider with "Start a new row" to split folders into their own row. Dropping directly onto an existing card inserts before it, shifting cards right and cascading any overflowing cards cleanly down to the next row.
+  - **Context Menu Row Controls**: Right-click any folder to quickly `Move to New Row` or `Merge with Row Above` when space permits.
   - **Natural Height Expansion**: Horizontal folder cards expand naturally without height caps to display all bookmark pills cleanly without vertical scroll clipping.
   - **Long-Press Drag Reordering**: Bookmarks inside horizontal folders can be reordered directly via tactile pointer drag (mirroring the top favourites bar) without requiring dedicated drag handles.
   - **Collapse & Expand**: Folders can be collapsed into compact headers via an interactive chevron button or right-click menu, with state saved across sessions.
-  - **Card Drag-and-Drop**: Easily reorder folder cards across your grid using the card header as a drag handle.
+  - **Vignette-Free Drag Previews**: Smooth drag-and-drop across the grid with a GPU-accelerated uniform 50% opacity preview under the cursor and empty slot state at the source position.
   - **Custom Emojis**: Set custom single-emoji folder icons using the quick picker with strict 1-emoji Unicode validation (`Intl.Segmenter`).
 - ↕️ **In-Folder Drag-and-Drop Bookmark Reordering**:
   - Reorder bookmarks directly within each folder card (using the 6-dot drag handle in vertical mode, or direct long-press drag in horizontal mode).

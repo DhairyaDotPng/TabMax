@@ -9,7 +9,12 @@ import {
   getRootIds,
   getFolderModeConfig,
   setFolderModeConfig,
-  updateFolderCardAppearance
+  updateFolderCardAppearance,
+  moveFolderToNewRow,
+  canMergeFolderWithRowAbove,
+  mergeFolderWithRowAbove,
+  isFolderInMultiCardRow,
+  onFolderSpanOrModeChanged
 } from './bookmarks.js';
 import { openEmojiPicker } from './settings.js';
 
@@ -146,10 +151,14 @@ function buildContextMenuItems(target) {
   // 4. Right click on a Folder Card (header or card body)
   let card = target ? target.closest('.bookmark-card') : null;
   if (!card && currentContextCard) {
-    card = document.querySelector(`.bookmark-card[data-folder-id="${currentContextCard.dataset.folderId}"]`) || currentContextCard;
+    const fid = currentContextCard.dataset?.folderId;
+    if (fid) {
+      card = document.querySelector(`.bookmark-card[data-folder-id="${fid}"]`) || currentContextCard;
+    }
   }
 
   if (card) {
+    currentContextCard = card;
     const folderId = card.dataset.folderId;
     const folderTitle = card.dataset.folderTitle;
     const config = getFolderModeConfig(folderId);
@@ -197,7 +206,7 @@ function buildContextMenuItems(target) {
       action: () => {
         const nextMode = isHorizontal ? 'vertical' : 'horizontal';
         setFolderModeConfig(folderId, { mode: nextMode });
-        updateFolderCardAppearance(folderId);
+        onFolderSpanOrModeChanged();
       }
     });
 
@@ -236,7 +245,7 @@ function buildContextMenuItems(target) {
             btn.onclick = (e) => {
               e.stopPropagation();
               setFolderModeConfig(folderId, { span: opt.value });
-              updateFolderCardAppearance(folderId);
+              onFolderSpanOrModeChanged();
               refreshMenu();
             };
             pillRow.appendChild(btn);
@@ -244,6 +253,27 @@ function buildContextMenuItems(target) {
 
           container.appendChild(pillRow);
           return container;
+        }
+      });
+    }
+
+    // Row Management: Move to New Row & Merge with Row Above
+    if (isFolderInMultiCardRow(folderId)) {
+      items.push({
+        label: 'Move to New Row',
+        icon: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>`,
+        action: () => {
+          moveFolderToNewRow(folderId);
+        }
+      });
+    }
+
+    if (canMergeFolderWithRowAbove(folderId)) {
+      items.push({
+        label: 'Merge with Row Above',
+        icon: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>`,
+        action: () => {
+          mergeFolderWithRowAbove(folderId);
         }
       });
     }

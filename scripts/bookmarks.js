@@ -2,6 +2,8 @@
 
 let allBookmarksCache = [];
 let cachedFolderCards = [];
+let cachedGridEl = null;
+let cachedOnEmojiClick = null;
 let rootBookmarkBarId = '1';
 let rootOtherBookmarksId = '2';
 let draggedBookmark = null;
@@ -38,6 +40,234 @@ export function setFolderModeConfig(folderId, partialConfig) {
     };
     localStorage.setItem('tabmax_folder_modes', JSON.stringify(all));
   } catch (_) {}
+}
+
+// Column span helper for a given folder (1, 2, 3, or 4 columns)
+export function getFolderSpan(folderId) {
+  const config = getFolderModeConfig(folderId);
+  if (config.mode !== 'horizontal') {
+    return 1;
+  }
+  const s = String(config.span || '2');
+  if (s === 'full') return 4;
+  const num = parseInt(s, 10);
+  return isNaN(num) ? 2 : Math.max(1, Math.min(4, num));
+}
+
+// Calculate the total column span consumed by an array of items in a row
+export function calculateRowSpan(row) {
+  if (!Array.isArray(row)) return 0;
+  return row.reduce((sum, item) => sum + getFolderSpan(item.id || item), 0);
+}
+
+// Helper to find the first column (1 to 4 - span + 1) in a row where a card of given span fits without overlap
+function findAvailableColInRow(row, span) {
+  const maxStart = 4 - span + 1;
+  for (let c = 1; c <= maxStart; c++) {
+    let overlap = false;
+    for (const item of row) {
+      const itemSpan = getFolderSpan(item.id);
+      if (!(c + span - 1 < item.col || c > item.col + itemSpan - 1)) {
+        overlap = true;
+        break;
+      }
+    }
+    if (!overlap) return c;
+  }
+  return null;
+}
+
+// Rebalance rows so that overlapping cards shift right and overflowing cards cascade to subsequent rows
+export function rebalanceRows(rows, startIdx = 0) {
+  for (let i = startIdx; i < rows.length; i++) {
+    const row = rows[i];
+    row.sort((a, b) => a.col - b.col);
+
+    // Push right any overlapping cards within the row
+    for (let j = 0; j < row.length - 1; j++) {
+      const current = row[j];
+      const next = row[j + 1];
+      const currentSpan = getFolderSpan(current.id);
+      const minNextCol = current.col + currentSpan;
+      if (next.col < minNextCol) {
+        next.col = minNextCol;
+      }
+    }
+
+    // Check if any cards overflow past column 4
+    while (row.length > 1) {
+      const last = row[row.length - 1];
+      const lastSpan = getFolderSpan(last.id);
+      if (last.col + lastSpan - 1 > 4) {
+        row.pop();
+        last.col = 1;
+        if (i + 1 < rows.length) {
+          rows[i + 1].unshift(last);
+        } else {
+          rows.push([last]);
+        }
+      } else {
+        break;
+      }
+    }
+
+    // Clamp single card to max valid column
+    if (row.length === 1) {
+      const only = row[0];
+      const span = getFolderSpan(only.id);
+      only.col = Math.max(1, Math.min(4 - span + 1, only.col));
+    }
+  }
+}
+
+// Get saved folder rows layout (each row is an array of { id, col })
+export function getSavedFolderRows(cards) {
+  let savedRows = [];
+  try {
+    const raw = localStorage.getItem('tabmax_folder_rows');
+    if (raw) savedRows = JSON.parse(raw);
+  } catch (_) {}
+
+  const cardList = (cards && cards.length > 0) ? cards : cachedFolderCards;
+  const cardMap = new Map((cardList || []).map(c => [c.id, c]));
+  const seenIds = new Set();
+  const validRows = [];
+
+  // Filter & normalize saved rows
+  if (Array.isArray(savedRows) && savedRows.length > 0) {
+    for (const row of savedRows) {
+      if (!Array.isArray(row)) continue;
+      const cleanRow = [];
+      let nextAutoCol = 1;
+
+      for (const item of row) {
+        let id, col;
+        if (typeof item === 'string') {
+          id = item;
+          col = nextAutoCol;
+        } else if (item && typeof item === 'object' && item.id) {
+          id = item.id;
+          col = typeof item.col === 'number' ? item.col : nextAutoCol;
+        } else {
+          continue;
+        }
+
+        if (cardMap.has(id) && !seenIds.has(id)) {
+          const span = getFolderSpan(id);
+          col = Math.max(1, Math.min(4 - span + 1, col));
+          cleanRow.push({ id, col });
+          seenIds.add(id);
+          nextAutoCol = col + span;
+        }
+      }
+
+      if (cleanRow.length > 0) {
+        cleanRow.sort((a, b) => a.col - b.col);
+        validRows.push(cleanRow);
+      }
+    }
+  }
+
+  // Any cards not yet placed (newly created folders or migration)
+  const remainingCards = (cardList || []).filter(c => !seenIds.has(c.id));
+  if (remainingCards.length > 0) {
+    let currentRow = validRows.length > 0 ? validRows[validRows.length - 1] : null;
+
+    for (const card of remainingCards) {
+      const span = getFolderSpan(card.id);
+      let placedCol = null;
+
+      if (currentRow) {
+        placedCol = findAvailableColInRow(currentRow, span);
+      }
+
+      if (placedCol === null) {
+        currentRow = [{ id: card.id, col: 1 }];
+        validRows.push(currentRow);
+      } else {
+        currentRow.push({ id: card.id, col: placedCol });
+        currentRow.sort((a, b) => a.col - b.col);
+      }
+      seenIds.add(card.id);
+    }
+  }
+
+  rebalanceRows(validRows);
+  const cleanRows = validRows.filter(r => r.length > 0);
+  saveFolderRows(cleanRows);
+  return cleanRows;
+}
+
+// Save folder rows and keep flat cards order in sync
+export function saveFolderRows(rows) {
+  const cleanRows = (rows || [])
+    .filter(r => Array.isArray(r) && r.length > 0)
+    .map(r => r.map(item => ({ id: item.id, col: item.col })));
+  localStorage.setItem('tabmax_folder_rows', JSON.stringify(cleanRows));
+  const flatOrder = cleanRows.flat().map(item => item.id);
+  saveCardsOrder(flatOrder);
+}
+
+// Check if a folder card shares its row with other folders
+export function isFolderInMultiCardRow(folderId) {
+  const rows = getSavedFolderRows(cachedFolderCards);
+  const row = rows.find(r => r.some(item => item.id === folderId));
+  return Boolean(row && row.length > 1);
+}
+
+// Move folder to its own new row immediately below its current row
+export function moveFolderToNewRow(folderId) {
+  const rows = getSavedFolderRows(cachedFolderCards);
+  const rowIdx = rows.findIndex(r => r.some(item => item.id === folderId));
+  if (rowIdx === -1) return;
+  if (rows[rowIdx].length <= 1) return;
+
+  rows[rowIdx] = rows[rowIdx].filter(item => item.id !== folderId);
+  rows.splice(rowIdx + 1, 0, [{ id: folderId, col: 1 }]);
+  saveFolderRows(rows);
+  refreshCardsGrid();
+}
+
+// Check if a folder can merge into the row above without exceeding 4 columns
+export function canMergeFolderWithRowAbove(folderId) {
+  const rows = getSavedFolderRows(cachedFolderCards);
+  const rowIdx = rows.findIndex(r => r.some(item => item.id === folderId));
+  if (rowIdx <= 0) return false;
+  const rowAbove = rows[rowIdx - 1];
+  const thisSpan = getFolderSpan(folderId);
+  return findAvailableColInRow(rowAbove, thisSpan) !== null;
+}
+
+// Merge folder into the row above
+export function mergeFolderWithRowAbove(folderId) {
+  const rows = getSavedFolderRows(cachedFolderCards);
+  const rowIdx = rows.findIndex(r => r.some(item => item.id === folderId));
+  if (rowIdx <= 0) return;
+  const rowAbove = rows[rowIdx - 1];
+  const thisSpan = getFolderSpan(folderId);
+  const targetCol = findAvailableColInRow(rowAbove, thisSpan);
+  if (targetCol === null) return;
+
+  rows[rowIdx] = rows[rowIdx].filter(item => item.id !== folderId);
+  rowAbove.push({ id: folderId, col: targetCol });
+  rowAbove.sort((a, b) => a.col - b.col);
+  saveFolderRows(rows);
+  refreshCardsGrid();
+}
+
+// Triggered when folder mode or folder width span changes
+export function onFolderSpanOrModeChanged() {
+  const rows = getSavedFolderRows(cachedFolderCards);
+  rebalanceRows(rows);
+  saveFolderRows(rows);
+  refreshCardsGrid();
+}
+
+// Re-renders the folder cards grid with cached parameters
+export function refreshCardsGrid() {
+  if (cachedGridEl && cachedFolderCards) {
+    renderCardsGrid(cachedFolderCards, cachedGridEl, cachedOnEmojiClick);
+  }
 }
 
 export async function loadBookmarks() {
@@ -226,6 +456,13 @@ export async function deleteFolder(folderId) {
         delete all[folderId];
         localStorage.setItem('tabmax_folder_modes', JSON.stringify(all));
       }
+    }
+    const rawRows = localStorage.getItem('tabmax_folder_rows');
+    if (rawRows) {
+      let rows = JSON.parse(rawRows);
+      rows = rows.map(r => r.filter(item => (item.id || item) !== folderId)).filter(r => r.length > 0);
+      localStorage.setItem('tabmax_folder_rows', JSON.stringify(rows));
+      saveCardsOrder(rows.flat().map(item => item.id || item));
     }
   } catch (_) {}
   return await chrome.bookmarks.removeTree(folderId);
@@ -483,10 +720,13 @@ function findTargetSiblingPill(container, clientX, clientY, currentPill) {
   return null;
 }
 
-// Render Folder Cards Grid
+// Render Folder Cards Grid with Explicit Row Architecture
 export function renderCardsGrid(cards, gridEl, onEmojiClick) {
   cachedFolderCards = cards || [];
+  cachedGridEl = gridEl;
+  cachedOnEmojiClick = onEmojiClick;
   gridEl.innerHTML = '';
+
   if (!cards || cards.length === 0) {
     gridEl.innerHTML = `
       <div class="empty-card-state" style="grid-column: 1 / -1;">
@@ -496,93 +736,161 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
     return;
   }
 
-  for (const card of cards) {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'bookmark-card';
-    cardEl.dataset.folderId = card.id;
-    cardEl.dataset.folderTitle = card.title;
-    cardEl.draggable = true;
+  const rows = getSavedFolderRows(cards);
+  const cardMap = new Map(cards.map(c => [c.id, c]));
 
-    // 1. Header
-    const header = document.createElement('div');
-    header.className = 'card-header';
+  for (let rIdx = 0; rIdx < rows.length; rIdx++) {
+    // Divider before this row (Start a new row)
+    const divider = createRowDropDivider(rIdx);
+    gridEl.appendChild(divider);
 
-    const titleGroup = document.createElement('div');
-    titleGroup.className = 'card-title-group';
+    // Row Container
+    const rowEl = document.createElement('div');
+    rowEl.className = 'folder-row';
+    rowEl.dataset.rowIdx = String(rIdx);
 
-    // Check if card is previously collapsed
-    const isCollapsed = getCollapsedFolders().includes(card.id);
-    if (isCollapsed) {
-      cardEl.classList.add('collapsed');
+    // 4-Column Row Track
+    const trackEl = document.createElement('div');
+    trackEl.className = 'folder-row-track';
+    trackEl.dataset.rowIdx = String(rIdx);
+
+    // 4 Snap Slot Guides across the 4 grid columns
+    for (let c = 1; c <= 4; c++) {
+      const slotGuide = document.createElement('div');
+      slotGuide.className = 'grid-snap-slot';
+      slotGuide.dataset.col = String(c);
+      slotGuide.style.gridColumn = String(c);
+      slotGuide.style.gridRow = '1';
+      trackEl.appendChild(slotGuide);
     }
 
-    // Emoji button
-    const emojiBtn = document.createElement('button');
-    emojiBtn.className = 'card-emoji-btn';
-    emojiBtn.title = 'Click to customize folder emoji';
-    emojiBtn.textContent = getSavedEmoji(card.id);
-    emojiBtn.draggable = false;
-    emojiBtn.onclick = (e) => {
-      e.stopPropagation();
-      if (onEmojiClick) onEmojiClick(card.id, card.title);
-    };
-    emojiBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    for (const item of rows[rIdx]) {
+      const cardId = item.id || item;
+      const cardCol = typeof item.col === 'number' ? item.col : 1;
+      const card = cardMap.get(cardId);
+      if (!card) continue;
 
-    const title = document.createElement('h3');
-    title.className = 'card-title';
-    title.textContent = card.title;
-    title.title = card.title;
+      const cardEl = document.createElement('div');
+      cardEl.className = 'bookmark-card';
+      cardEl.dataset.folderId = card.id;
+      cardEl.dataset.folderTitle = card.title;
+      cardEl.dataset.col = String(cardCol);
+      cardEl.draggable = true;
 
-    titleGroup.appendChild(emojiBtn);
-    titleGroup.appendChild(title);
+      const span = getFolderSpan(card.id);
+      cardEl.style.gridColumn = `${cardCol} / span ${span}`;
+      cardEl.style.gridRow = '1';
 
-    // Meta (Count + Collapse Chevron Button)
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
+      // 1. Header
+      const header = document.createElement('div');
+      header.className = 'card-header';
 
-    const count = document.createElement('span');
-    count.className = 'card-count';
-    count.textContent = card.bookmarks.length;
+      const titleGroup = document.createElement('div');
+      titleGroup.className = 'card-title-group';
 
-    const collapseBtn = document.createElement('button');
-    collapseBtn.className = 'card-collapse-btn';
-    collapseBtn.type = 'button';
-    collapseBtn.draggable = false;
-    collapseBtn.title = isCollapsed ? 'Expand folder' : 'Collapse folder';
-    collapseBtn.setAttribute('aria-label', isCollapsed ? 'Expand folder' : 'Collapse folder');
-    collapseBtn.innerHTML = `
-      <svg class="chevron-icon" viewBox="0 0 24 24" width="16" height="16">
-        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
+      // Check if card is previously collapsed
+      const isCollapsed = getCollapsedFolders().includes(card.id);
+      if (isCollapsed) {
+        cardEl.classList.add('collapsed');
+      }
 
-    collapseBtn.onclick = (e) => {
-      e.stopPropagation();
-      const nowCollapsed = toggleFolderCollapsed(card.id);
-      cardEl.classList.toggle('collapsed', nowCollapsed);
-      collapseBtn.title = nowCollapsed ? 'Expand folder' : 'Collapse folder';
-      collapseBtn.setAttribute('aria-label', nowCollapsed ? 'Expand folder' : 'Collapse folder');
-    };
-    collapseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+      // Emoji button
+      const emojiBtn = document.createElement('button');
+      emojiBtn.className = 'card-emoji-btn';
+      emojiBtn.title = 'Click to customize folder emoji';
+      emojiBtn.textContent = getSavedEmoji(card.id);
+      emojiBtn.draggable = false;
+      emojiBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (onEmojiClick) onEmojiClick(card.id, card.title);
+      };
+      emojiBtn.addEventListener('mousedown', (e) => e.stopPropagation());
 
-    meta.appendChild(count);
-    meta.appendChild(collapseBtn);
+      const title = document.createElement('h3');
+      title.className = 'card-title';
+      title.textContent = card.title;
+      title.title = card.title;
 
-    header.appendChild(titleGroup);
-    header.appendChild(meta);
-    cardEl.appendChild(header);
+      titleGroup.appendChild(emojiBtn);
+      titleGroup.appendChild(title);
 
-    // 2. Bookmarks List Body (Vertical or Horizontal based on Folder Mode)
-    const body = document.createElement('div');
-    body.className = 'card-body';
-    renderCardBody(card, cardEl, body);
+      // Meta (Count + Collapse Chevron Button)
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
 
-    cardEl.appendChild(body);
+      const count = document.createElement('span');
+      count.className = 'card-count';
+      count.textContent = card.bookmarks.length;
 
-    // Enable Card Drag & Drop
-    setupCardDragDrop(cardEl, gridEl);
+      const collapseBtn = document.createElement('button');
+      collapseBtn.className = 'card-collapse-btn';
+      collapseBtn.type = 'button';
+      collapseBtn.draggable = false;
+      collapseBtn.title = isCollapsed ? 'Expand folder' : 'Collapse folder';
+      collapseBtn.setAttribute('aria-label', isCollapsed ? 'Expand folder' : 'Collapse folder');
+      collapseBtn.innerHTML = `
+        <svg class="chevron-icon" viewBox="0 0 24 24" width="16" height="16">
+          <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
 
-    gridEl.appendChild(cardEl);
+      collapseBtn.onclick = (e) => {
+        e.stopPropagation();
+        const nowCollapsed = toggleFolderCollapsed(card.id);
+        cardEl.classList.toggle('collapsed', nowCollapsed);
+        collapseBtn.title = nowCollapsed ? 'Expand folder' : 'Collapse folder';
+        collapseBtn.setAttribute('aria-label', nowCollapsed ? 'Expand folder' : 'Collapse folder');
+      };
+      collapseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+
+      meta.appendChild(count);
+      meta.appendChild(collapseBtn);
+
+      header.appendChild(titleGroup);
+      header.appendChild(meta);
+      cardEl.appendChild(header);
+
+      // 2. Bookmarks List Body (Vertical or Horizontal based on Folder Mode)
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      renderCardBody(card, cardEl, body);
+
+      cardEl.appendChild(body);
+
+      // Enable Card Drag & Drop
+      setupCardDragDrop(cardEl);
+
+      trackEl.appendChild(cardEl);
+    }
+
+    // Attach Row Track Empty-Slot Drag & Drop handler
+    setupRowTrackDragDrop(trackEl, rIdx);
+
+    rowEl.appendChild(trackEl);
+    gridEl.appendChild(rowEl);
   }
+
+  // Final divider below the last row
+  const bottomDivider = createRowDropDivider(rows.length);
+  gridEl.appendChild(bottomDivider);
+}
+
+// Create a Row Drop Divider ("Start a new row")
+function createRowDropDivider(rowIdx) {
+  const divider = document.createElement('div');
+  divider.className = 'row-drop-divider';
+  divider.dataset.rowIdx = String(rowIdx);
+  divider.innerHTML = `
+    <div class="row-drop-divider-line"></div>
+    <div class="row-drop-divider-badge">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Start a new row</span>
+    </div>
+  `;
+  setupRowDividerDragDrop(divider);
+  return divider;
 }
 
 // Render Bookmarks inside Card Body (Handles Vertical vs Horizontal List modes)
@@ -812,62 +1120,288 @@ function setupBookmarkDragDrop(link, dragHandle, cardBody) {
 
 // Drag & Drop Card Reordering
 let draggedCard = null;
+let floatingDragCard = null;
+let cardDragOffsetX = 0;
+let cardDragOffsetY = 0;
+let draggedCardHeight = 46;
+let draggedCardIsCollapsed = false;
 
-function setupCardDragDrop(cardEl, gridEl) {
+const emptyDragImg = new Image();
+emptyDragImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+function onWindowCardDragOver(e) {
+  if (!floatingDragCard) return;
+  if (e.clientX === 0 && e.clientY === 0) return;
+  const x = e.clientX - cardDragOffsetX;
+  const y = e.clientY - cardDragOffsetY;
+  floatingDragCard.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+}
+
+function cleanupDragState() {
+  if (floatingDragCard) {
+    floatingDragCard.remove();
+    floatingDragCard = null;
+  }
+  window.removeEventListener('dragover', onWindowCardDragOver, { capture: true });
+  document.body.classList.remove('is-dragging-card');
+  document.body.style.removeProperty('--dragged-card-height');
+  document.querySelectorAll('.bookmark-card').forEach(c => {
+    c.classList.remove('drag-over', 'dragging');
+  });
+  document.querySelectorAll('.grid-ghost-slot').forEach(g => g.remove());
+  document.querySelectorAll('.row-drop-divider').forEach(d => d.classList.remove('drag-over'));
+  draggedCard = null;
+}
+
+// Calculate the 1-based target column slot from pointer X within track
+function getDropColumn(e, trackEl, draggedSpan) {
+  const rect = trackEl.getBoundingClientRect();
+  const relX = e.clientX - rect.left;
+  const trackWidth = rect.width;
+  if (trackWidth <= 0) return 1;
+
+  const cs = window.getComputedStyle(trackEl);
+  const gap = parseFloat(cs.columnGap || cs.gap) || 16;
+  const colWidth = (trackWidth - 3 * gap) / 4;
+  const colSlotWidth = colWidth + gap;
+
+  let rawCol = Math.floor(relX / colSlotWidth) + 1;
+  rawCol = Math.max(1, Math.min(4, rawCol));
+
+  const maxStartCol = Math.max(1, 4 - draggedSpan + 1);
+  return Math.min(rawCol, maxStartCol);
+}
+
+function setupCardDragDrop(cardEl) {
   cardEl.addEventListener('dragstart', (e) => {
-    // If dragging a bookmark inside the card, do NOT drag the card
-    if (draggedBookmark || e.target.closest('.bookmark-link') || e.target.closest('.bookmark-drag-handle')) {
+    // If dragging a bookmark inside the card or interactive buttons, do NOT drag the card
+    if (draggedBookmark || e.target.closest('.bookmark-link') || e.target.closest('.bookmark-drag-handle') || e.target.closest('button')) {
       return;
     }
     draggedCard = cardEl;
-    cardEl.classList.add('dragging');
     document.body.classList.add('is-dragging-card');
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', cardEl.dataset.folderId);
+
+    // Suppress Chromium's native drag ghost which applies a radial vignette on large elements
+    try {
+      e.dataTransfer.setDragImage(emptyDragImg, 0, 0);
+    } catch (_) {}
+
+    // Create a GPU-accelerated floating preview showing the entire card at uniform 50% opacity
+    const rect = cardEl.getBoundingClientRect();
+    cardDragOffsetX = e.clientX - rect.left;
+    cardDragOffsetY = e.clientY - rect.top;
+    draggedCardHeight = rect.height > 0 ? rect.height : (cardEl.offsetHeight || 46);
+    draggedCardIsCollapsed = cardEl.classList.contains('collapsed');
+
+    // Set CSS variable so empty snap slots across the entire grid match the dragged card's height
+    document.body.style.setProperty('--dragged-card-height', `${draggedCardHeight}px`);
+
+    if (floatingDragCard) {
+      floatingDragCard.remove();
+    }
+
+    floatingDragCard = cardEl.cloneNode(true);
+    floatingDragCard.classList.remove('dragging', 'drag-over');
+    floatingDragCard.classList.add('floating-card-drag-preview');
+    floatingDragCard.style.position = 'fixed';
+    floatingDragCard.style.top = '0px';
+    floatingDragCard.style.left = '0px';
+    floatingDragCard.style.width = `${rect.width}px`;
+    floatingDragCard.style.height = `${rect.height}px`;
+    floatingDragCard.style.margin = '0';
+    floatingDragCard.style.opacity = '0.5';
+    floatingDragCard.style.zIndex = '999999';
+    floatingDragCard.style.pointerEvents = 'none';
+    floatingDragCard.style.willChange = 'transform';
+    floatingDragCard.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+    floatingDragCard.style.transition = 'none';
+
+    document.body.appendChild(floatingDragCard);
+
+    // Use capture: true so window always receives dragover even if child stops propagation
+    window.addEventListener('dragover', onWindowCardDragOver, { capture: true, passive: true });
+
+    // Remove source card from grid layout flow so its original space becomes an available snap area
+    setTimeout(() => {
+      if (draggedCard === cardEl) {
+        cardEl.classList.add('dragging');
+      }
+    }, 0);
   });
 
   cardEl.addEventListener('dragend', () => {
-    if (draggedCard) {
-      draggedCard.classList.remove('dragging');
-      draggedCard = null;
-    }
-    document.body.classList.remove('is-dragging-card');
-    document.querySelectorAll('.bookmark-card').forEach(c => c.classList.remove('drag-over'));
-    
-    // Save current cards order in DOM
-    const cardIds = Array.from(gridEl.querySelectorAll('.bookmark-card')).map(c => c.dataset.folderId);
-    saveCardsOrder(cardIds);
+    cleanupDragState();
   });
 
   cardEl.addEventListener('dragover', (e) => {
-    if (draggedBookmark) return;
+    if (draggedBookmark || !draggedCard || draggedCard === cardEl) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (draggedCard && draggedCard !== cardEl) {
-      cardEl.classList.add('drag-over');
-    }
+    cardEl.classList.add('drag-over');
+
+    // Remove any ghost placeholder from the track so card highlight is clear
+    const ghost = cardEl.parentElement?.querySelector('.grid-ghost-slot');
+    if (ghost) ghost.remove();
   });
 
-  cardEl.addEventListener('dragleave', () => {
-    cardEl.classList.remove('drag-over');
+  cardEl.addEventListener('dragleave', (e) => {
+    if (!cardEl.contains(e.relatedTarget)) {
+      cardEl.classList.remove('drag-over');
+    }
   });
 
   cardEl.addEventListener('drop', (e) => {
-    if (draggedBookmark) return;
+    if (draggedBookmark || !draggedCard || draggedCard === cardEl) return;
     e.preventDefault();
     cardEl.classList.remove('drag-over');
-    if (draggedCard && draggedCard !== cardEl) {
-      const allCards = Array.from(gridEl.children);
-      const draggedIndex = allCards.indexOf(draggedCard);
-      const targetIndex = allCards.indexOf(cardEl);
 
-      if (draggedIndex < targetIndex) {
-        gridEl.insertBefore(draggedCard, cardEl.nextSibling);
-      } else {
-        gridEl.insertBefore(draggedCard, cardEl);
-      }
-      
-      const cardIds = Array.from(gridEl.querySelectorAll('.bookmark-card')).map(c => c.dataset.folderId);
-      saveCardsOrder(cardIds);
+    const draggedFolderId = draggedCard.dataset.folderId;
+    const targetFolderId = cardEl.dataset.folderId;
+    const draggedSpan = getFolderSpan(draggedFolderId);
+
+    const rows = getSavedFolderRows(cachedFolderCards);
+    const targetRowIdx = rows.findIndex(r => r.some(item => item.id === targetFolderId));
+    if (targetRowIdx === -1) return;
+
+    const targetItem = rows[targetRowIdx].find(item => item.id === targetFolderId);
+    const targetCol = targetItem ? targetItem.col : 1;
+
+    // Remove dragged card from its old row
+    const oldRowIdx = rows.findIndex(r => r.some(item => item.id === draggedFolderId));
+    if (oldRowIdx !== -1) {
+      rows[oldRowIdx] = rows[oldRowIdx].filter(item => item.id !== draggedFolderId);
     }
+
+    // Insert dragged card at target card's column, and shift target card right
+    if (targetItem) {
+      targetItem.col = targetCol + draggedSpan;
+    }
+    rows[targetRowIdx].push({ id: draggedFolderId, col: targetCol });
+
+    rebalanceRows(rows, targetRowIdx);
+    saveFolderRows(rows);
+    cleanupDragState();
+    refreshCardsGrid();
+  });
+}
+
+// Track Drag & Drop for empty column slots anywhere in an existing row
+function setupRowTrackDragDrop(trackEl, rowIdx) {
+  trackEl.addEventListener('dragover', (e) => {
+    if (draggedBookmark || !draggedCard) return;
+
+    // If mouse is directly over another card inside this track, let card dragover handle it
+    const overCard = e.target.closest('.bookmark-card');
+    if (overCard && overCard !== draggedCard) {
+      const ghost = trackEl.querySelector('.grid-ghost-slot');
+      if (ghost) ghost.remove();
+      return;
+    }
+
+    const draggedFolderId = draggedCard.dataset.folderId;
+    const draggedSpan = getFolderSpan(draggedFolderId);
+    const targetCol = getDropColumn(e, trackEl, draggedSpan);
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    // Remove card highlights inside track
+    trackEl.querySelectorAll('.bookmark-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+
+    // Show dashed ghost placeholder snapped to targetCol
+    let ghost = trackEl.querySelector('.grid-ghost-slot');
+    if (!ghost) {
+      ghost = document.createElement('div');
+      ghost.className = `grid-ghost-slot folder-span-${draggedSpan === 4 ? 'full' : draggedSpan}`;
+      if (draggedCardIsCollapsed) {
+        ghost.classList.add('collapsed');
+      }
+      ghost.style.gridRow = '1';
+      trackEl.appendChild(ghost);
+    }
+    ghost.style.height = `${draggedCardHeight}px`;
+    ghost.style.gridColumn = `${targetCol} / span ${draggedSpan}`;
+    ghost.dataset.targetCol = String(targetCol);
+  });
+
+  trackEl.addEventListener('dragleave', (e) => {
+    if (!trackEl.contains(e.relatedTarget)) {
+      const ghost = trackEl.querySelector('.grid-ghost-slot');
+      if (ghost) ghost.remove();
+    }
+  });
+
+  trackEl.addEventListener('drop', (e) => {
+    if (draggedBookmark || !draggedCard) return;
+    if (e.target.closest('.bookmark-card')) return;
+
+    const draggedFolderId = draggedCard.dataset.folderId;
+    const draggedSpan = getFolderSpan(draggedFolderId);
+
+    const ghost = trackEl.querySelector('.grid-ghost-slot');
+    const targetCol = ghost && ghost.dataset.targetCol ? parseInt(ghost.dataset.targetCol, 10) : getDropColumn(e, trackEl, draggedSpan);
+
+    e.preventDefault();
+
+    const rows = getSavedFolderRows(cachedFolderCards);
+    const oldRowIdx = rows.findIndex(r => r.some(item => item.id === draggedFolderId));
+    if (oldRowIdx !== -1) {
+      rows[oldRowIdx] = rows[oldRowIdx].filter(item => item.id !== draggedFolderId);
+    }
+
+    if (!rows[rowIdx]) rows[rowIdx] = [];
+    rows[rowIdx].push({ id: draggedFolderId, col: targetCol });
+
+    rebalanceRows(rows, rowIdx);
+    saveFolderRows(rows);
+    cleanupDragState();
+    refreshCardsGrid();
+  });
+}
+
+// Divider Drag & Drop for inserting a brand new row ("Start a new row")
+function setupRowDividerDragDrop(divider) {
+  divider.addEventListener('dragover', (e) => {
+    if (draggedBookmark || !draggedCard) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    divider.classList.add('drag-over');
+
+    // Remove any ghost placeholder from tracks
+    document.querySelectorAll('.grid-ghost-slot').forEach(g => g.remove());
+  });
+
+  divider.addEventListener('dragleave', (e) => {
+    if (!divider.contains(e.relatedTarget)) {
+      divider.classList.remove('drag-over');
+    }
+  });
+
+  divider.addEventListener('drop', (e) => {
+    if (draggedBookmark || !draggedCard) return;
+    e.preventDefault();
+    divider.classList.remove('drag-over');
+
+    const draggedFolderId = draggedCard.dataset.folderId;
+    let targetIdx = parseInt(divider.dataset.rowIdx, 10);
+    const rows = getSavedFolderRows(cachedFolderCards);
+
+    const oldRowIdx = rows.findIndex(r => r.some(item => item.id === draggedFolderId));
+    if (oldRowIdx !== -1) {
+      rows[oldRowIdx] = rows[oldRowIdx].filter(item => item.id !== draggedFolderId);
+      if (rows[oldRowIdx].length === 0) {
+        rows.splice(oldRowIdx, 1);
+        if (oldRowIdx < targetIdx) {
+          targetIdx--;
+        }
+      }
+    }
+
+    rows.splice(Math.max(0, Math.min(rows.length, targetIdx)), 0, [{ id: draggedFolderId, col: 1 }]);
+    saveFolderRows(rows);
+    cleanupDragState();
+    refreshCardsGrid();
   });
 }

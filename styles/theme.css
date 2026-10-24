@@ -33,7 +33,7 @@ html[data-theme-style="default"] {
   
   --card: 0 0% 100%;
   --card-foreground: 0 0% 9%;
-  --card-border: 0 0% 89.8%;
+  --card-border: 0 0% 83%;
   
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 9%;
@@ -55,8 +55,8 @@ html[data-theme-style="default"] {
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
   
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
+  --border: 0 0% 83%;
+  --input: 0 0% 83%;
   --ring: 0 0% 9%;
   
   --radius: 0.85rem;
@@ -79,6 +79,18 @@ html[data-theme-style="default"] {
   --md-sys-color-surface-container-highest: hsl(0 0% 95%);
   --md-sys-color-surface-container-low: hsl(0 0% 100%);
   --md-sys-color-surface-container-lowest: hsl(0 0% 100%);
+}
+
+/* Enhanced outline contrast for pills & dividers in Shadcn light mode */
+:root:not([data-theme="dark"]) .quick-pill,
+:root:not([data-theme="dark"]) .folder-pill,
+html[data-theme-style="default"]:not([data-theme="dark"]) .quick-pill,
+html[data-theme-style="default"]:not([data-theme="dark"]) .folder-pill {
+  border-color: hsl(var(--border) / 0.75) !important;
+}
+:root:not([data-theme="dark"]) .card-header,
+html[data-theme-style="default"]:not([data-theme="dark"]) .card-header {
+  border-bottom-color: hsl(var(--border) / 0.75);
 }
 
 [data-theme="dark"],
@@ -568,6 +580,43 @@ html[data-theme-style="m3e"] .bookmark-card {
 html[data-theme-style="m3e"] .bookmark-card:hover {
   box-shadow: var(--md-elevation-3) !important;
   transform: translateY(-2px);
+}
+html[data-theme-style="m3e"] .bookmark-card.drag-over {
+  border: 2px dashed var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .grid-snap-slot {
+  border: 1.5px dashed var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--radius-2xl) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  opacity: 0.6;
+}
+html[data-theme-style="m3e"] .grid-ghost-slot {
+  border: 2px dashed var(--md-sys-color-primary) !important;
+  border-radius: var(--radius-2xl) !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  opacity: 0.5;
+}
+html[data-theme-style="m3e"] .row-drop-divider-line {
+  border-top: 2px dashed var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .row-drop-divider-badge {
+  border-radius: var(--radius-full) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  border: 1px dashed var(--md-sys-color-outline-variant) !important;
+}
+html[data-theme-style="m3e"] .row-drop-divider.drag-over .row-drop-divider-line {
+  border-top: 2.5px dashed var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .row-drop-divider.drag-over .row-drop-divider-badge {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border-color: var(--md-sys-color-primary) !important;
+  box-shadow: var(--md-elevation-3) !important;
+}
+html[data-theme-style="m3e"] .floating-card-drag-preview {
+  opacity: 0.5 !important;
+  box-shadow: var(--md-elevation-4) !important;
 }
 html[data-theme-style="m3e"] .bookmark-card.collapsed {
   border-radius: var(--radius-full) !important;
@@ -1521,6 +1570,47 @@ html[data-theme-style="neo"] .bookmark-card {
 html[data-theme-style="neo"] .bookmark-card:hover {
   transform: none !important;
   box-shadow: none !important;
+}
+html[data-theme-style="neo"] .bookmark-card.drag-over {
+  border: 3px dashed var(--neo-accent) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .grid-snap-slot {
+  border: 2px dashed var(--neo-border-color) !important;
+  border-radius: 0 !important;
+  background-color: var(--neo-accent-light) !important;
+  opacity: 0.35;
+}
+html[data-theme-style="neo"] .grid-ghost-slot {
+  border: 3px dashed var(--neo-border-color) !important;
+  border-radius: 0 !important;
+  background-color: var(--neo-accent-light) !important;
+  opacity: 0.55;
+}
+html[data-theme-style="neo"] .row-drop-divider-line {
+  border-top: 3px dashed var(--neo-border-color) !important;
+}
+html[data-theme-style="neo"] .row-drop-divider-badge {
+  border-radius: 0 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  background-color: var(--neo-card-bg) !important;
+  color: var(--neo-text) !important;
+  font-weight: 800 !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .row-drop-divider.drag-over .row-drop-divider-line {
+  border-top: 3px dashed var(--neo-accent) !important;
+}
+html[data-theme-style="neo"] .row-drop-divider.drag-over .row-drop-divider-badge {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  border-color: var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .floating-card-drag-preview {
+  opacity: 0.5 !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
 }
 html[data-theme-style="neo"] .bookmark-card .card-header {
   background-color: var(--neo-card-bg) !important;
