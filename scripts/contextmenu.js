@@ -6,11 +6,16 @@ import {
   createBookmark,
   updateBookmark,
   deleteBookmark,
-  getRootIds
+  getRootIds,
+  getFolderModeConfig,
+  setFolderModeConfig,
+  updateFolderCardAppearance
 } from './bookmarks.js';
 import { openEmojiPicker } from './settings.js';
 
 let activeMenu = null;
+let currentContextTarget = null;
+let currentContextCard = null;
 
 export function setupContextMenu(onRefreshNeeded) {
   // Listen for right clicks across the page
@@ -23,6 +28,9 @@ export function setupContextMenu(onRefreshNeeded) {
 
     e.preventDefault();
     closeContextMenu();
+
+    currentContextTarget = e.target;
+    currentContextCard = e.target.closest('.bookmark-card');
 
     const menuItems = buildContextMenuItems(e.target);
     if (menuItems.length > 0) {
@@ -136,10 +144,16 @@ function buildContextMenuItems(target) {
   }
 
   // 4. Right click on a Folder Card (header or card body)
-  const card = target.closest('.bookmark-card');
+  let card = target ? target.closest('.bookmark-card') : null;
+  if (!card && currentContextCard) {
+    card = document.querySelector(`.bookmark-card[data-folder-id="${currentContextCard.dataset.folderId}"]`) || currentContextCard;
+  }
+
   if (card) {
     const folderId = card.dataset.folderId;
     const folderTitle = card.dataset.folderTitle;
+    const config = getFolderModeConfig(folderId);
+    const isHorizontal = config.mode === 'horizontal';
 
     const isCollapsed = card.classList.contains('collapsed');
     items.push({
@@ -170,6 +184,70 @@ function buildContextMenuItems(target) {
         if (emojiBtn) emojiBtn.click();
       }
     });
+
+    items.push({ separator: true });
+
+    // Folder Mode Switch (Vertical List <-> Horizontal List)
+    items.push({
+      label: isHorizontal ? 'Folder Mode: Horizontal List' : 'Folder Mode: Vertical List',
+      icon: isHorizontal
+        ? `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="8" height="6" rx="2"/><rect x="13" y="4" width="8" height="6" rx="2"/><rect x="3" y="14" width="8" height="6" rx="2"/><rect x="13" y="14" width="8" height="6" rx="2"/></svg>`
+        : `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+      keepOpen: true,
+      action: () => {
+        const nextMode = isHorizontal ? 'vertical' : 'horizontal';
+        setFolderModeConfig(folderId, { mode: nextMode });
+        updateFolderCardAppearance(folderId);
+      }
+    });
+
+    // Folder Width Selector (Visible only when in Horizontal List mode)
+    if (isHorizontal) {
+      items.push({
+        customRender: (refreshMenu) => {
+          const container = document.createElement('div');
+          container.className = 'context-width-container';
+
+          const labelRow = document.createElement('div');
+          labelRow.className = 'context-width-label-row';
+          labelRow.innerHTML = `
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="12" x2="3" y2="12"/><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/></svg>
+            <span>Folder Width</span>
+          `;
+          container.appendChild(labelRow);
+
+          const pillRow = document.createElement('div');
+          pillRow.className = 'context-width-pill-row';
+
+          const widthOptions = [
+            { label: '1 Col', value: '1' },
+            { label: '2 Cols', value: '2' },
+            { label: '3 Cols', value: '3' },
+            { label: 'Full', value: 'full' }
+          ];
+
+          const currentSpan = String(config.span || '2');
+
+          for (const opt of widthOptions) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'context-width-pill' + (currentSpan === opt.value ? ' active' : '');
+            btn.textContent = opt.label;
+            btn.onclick = (e) => {
+              e.stopPropagation();
+              setFolderModeConfig(folderId, { span: opt.value });
+              updateFolderCardAppearance(folderId);
+              refreshMenu();
+            };
+            pillRow.appendChild(btn);
+          }
+
+          container.appendChild(pillRow);
+          return container;
+        }
+      });
+    }
+
     items.push({ separator: true });
     items.push({
       label: 'Delete Folder',
@@ -200,15 +278,29 @@ function buildContextMenuItems(target) {
   return items;
 }
 
-function renderFloatingMenu(items, x, y) {
+function renderFloatingMenu(items, x, y, isRefresh = false) {
+  if (activeMenu) {
+    activeMenu.remove();
+    activeMenu = null;
+  }
+
   const menu = document.createElement('div');
   menu.className = 'context-menu';
+  if (isRefresh) {
+    menu.style.animation = 'none';
+  }
 
   for (const item of items) {
     if (item.separator) {
       const sep = document.createElement('div');
       sep.className = 'context-separator';
       menu.appendChild(sep);
+      continue;
+    }
+
+    if (item.customRender) {
+      const customEl = item.customRender(() => refreshCurrentMenu());
+      menu.appendChild(customEl);
       continue;
     }
 
@@ -228,8 +320,13 @@ function renderFloatingMenu(items, x, y) {
 
     row.addEventListener('click', (e) => {
       e.stopPropagation();
-      closeContextMenu();
-      item.action();
+      if (item.keepOpen) {
+        item.action();
+        refreshCurrentMenu();
+      } else {
+        closeContextMenu();
+        item.action();
+      }
     });
 
     menu.appendChild(row);
@@ -239,13 +336,23 @@ function renderFloatingMenu(items, x, y) {
   activeMenu = menu;
 
   // Viewport bounds clamping
-  const menuW = menu.offsetWidth || 180;
-  const menuH = menu.offsetHeight || 150;
+  const menuW = menu.offsetWidth || 200;
+  const menuH = menu.offsetHeight || 160;
   const maxX = window.innerWidth + window.scrollX - menuW - 10;
   const maxY = window.innerHeight + window.scrollY - menuH - 10;
 
   menu.style.left = `${Math.min(x, maxX)}px`;
   menu.style.top = `${Math.min(y, maxY)}px`;
+}
+
+function refreshCurrentMenu() {
+  if (!activeMenu) return;
+  const currentLeft = parseFloat(activeMenu.style.left) || 0;
+  const currentTop = parseFloat(activeMenu.style.top) || 0;
+  const newItems = buildContextMenuItems(currentContextTarget);
+  if (newItems.length > 0) {
+    renderFloatingMenu(newItems, currentLeft, currentTop, true);
+  }
 }
 
 function closeContextMenu() {

@@ -401,14 +401,48 @@ body.is-reordering-favourites {
   gap: 1.25rem;
   align-items: start;
 }
+.bookmark-card.folder-span-1 {
+  grid-column: span 1;
+}
+.bookmark-card.folder-span-2 {
+  grid-column: span 2;
+}
+.bookmark-card.folder-span-3 {
+  grid-column: span 3;
+}
+.bookmark-card.folder-span-full {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1200px) {
   .cards-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .bookmark-card.folder-span-3,
+  .bookmark-card.folder-span-full {
+    grid-column: 1 / -1;
   }
 }
 @media (max-width: 860px) {
   .cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bookmark-card.folder-span-2,
+  .bookmark-card.folder-span-3,
+  .bookmark-card.folder-span-full {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 540px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .bookmark-card,
+  .bookmark-card.folder-span-1,
+  .bookmark-card.folder-span-2,
+  .bookmark-card.folder-span-3,
+  .bookmark-card.folder-span-full {
+    grid-column: 1 / -1 !important;
   }
 }
 
@@ -536,11 +570,12 @@ body.is-dragging-card * {
 .bookmark-card.collapsed .card-header {
   border-bottom: 1px solid transparent;
 }
-.bookmark-card.collapsed .card-body {
-  display: none;
+.bookmark-card.collapsed .card-body,
+.bookmark-card.folder-mode-horizontal.collapsed .card-body {
+  display: none !important;
 }
 
-/* Card Bookmarks List with Max Height */
+/* Card Bookmarks List with Max Height (Vertical List) */
 .card-body {
   padding: 0.5rem;
   max-height: 380px;
@@ -548,6 +583,25 @@ body.is-dragging-card * {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+/* Card Bookmarks List (Horizontal List Mode) */
+.bookmark-card.folder-mode-horizontal .card-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  max-height: none;
+  overflow: visible;
+}
+.bookmark-card.folder-mode-horizontal .card-body .empty-card-state {
+  width: 100%;
+}
+.card-body.is-reordering-pills {
+  cursor: grabbing;
 }
 .bookmark-link {
   display: flex;
@@ -567,6 +621,32 @@ body.is-dragging-card * {
 .bookmark-link:hover {
   background-color: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
+}
+
+/* Bookmarks inside Horizontal Folders (Exact match to top bar favourites) */
+.bookmark-card.folder-mode-horizontal .folder-pill,
+.folder-pill {
+  border-radius: var(--radius-full) !important;
+  border: 1px solid hsl(var(--border) / 0.6) !important;
+  border-top: 1px solid hsl(var(--border) / 0.6) !important;
+  border-bottom: 1px solid hsl(var(--border) / 0.6) !important;
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  max-width: 220px;
+  cursor: pointer;
+  margin-bottom: 0 !important;
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease !important;
+}
+.bookmark-card.folder-mode-horizontal .folder-pill:hover,
+.folder-pill:hover {
+  background-color: hsl(var(--accent)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-subtle);
 }
 .bookmark-title {
   flex: 1;
@@ -963,6 +1043,58 @@ body.is-dragging-bookmark * {
   height: 1px;
   background-color: hsl(var(--border));
   margin: 0.25rem 0.2rem;
+}
+
+/* Context Menu Folder Width Selector */
+.context-width-container {
+  padding: 0.35rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.context-width-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.context-width-label-row .icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  opacity: 0.8;
+}
+.context-width-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.context-width-pill {
+  flex: 1;
+  padding: 0.28rem 0.35rem;
+  border-radius: var(--radius-sm);
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border) / 0.8);
+  color: hsl(var(--secondary-foreground));
+  font-size: 0.73rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.context-width-pill:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+.context-width-pill.active {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------------------

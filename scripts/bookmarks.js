@@ -1,6 +1,7 @@
 // TabMax - Bookmarks Module & Chrome Bookmarks CRUD
 
 let allBookmarksCache = [];
+let cachedFolderCards = [];
 let rootBookmarkBarId = '1';
 let rootOtherBookmarksId = '2';
 let draggedBookmark = null;
@@ -8,6 +9,35 @@ let isInternalMove = false;
 
 export function isInternalBookmarkMoving() {
   return isInternalMove;
+}
+
+// Folder Modes & Width Configuration (Stored in localStorage: 'tabmax_folder_modes')
+export function getFolderModeConfig(folderId) {
+  try {
+    const raw = localStorage.getItem('tabmax_folder_modes');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed[folderId]) {
+        return {
+          mode: parsed[folderId].mode === 'horizontal' ? 'horizontal' : 'vertical',
+          span: parsed[folderId].span || '2'
+        };
+      }
+    }
+  } catch (_) {}
+  return { mode: 'vertical', span: '2' };
+}
+
+export function setFolderModeConfig(folderId, partialConfig) {
+  try {
+    const raw = localStorage.getItem('tabmax_folder_modes');
+    const all = raw ? JSON.parse(raw) : {};
+    all[folderId] = {
+      ...(all[folderId] || { mode: 'vertical', span: '2' }),
+      ...partialConfig
+    };
+    localStorage.setItem('tabmax_folder_modes', JSON.stringify(all));
+  } catch (_) {}
 }
 
 export async function loadBookmarks() {
@@ -188,6 +218,16 @@ export async function renameFolder(folderId, newTitle) {
 
 export async function deleteFolder(folderId) {
   if (!chrome.bookmarks) return;
+  try {
+    const raw = localStorage.getItem('tabmax_folder_modes');
+    if (raw) {
+      const all = JSON.parse(raw);
+      if (all[folderId]) {
+        delete all[folderId];
+        localStorage.setItem('tabmax_folder_modes', JSON.stringify(all));
+      }
+    }
+  } catch (_) {}
   return await chrome.bookmarks.removeTree(folderId);
 }
 
@@ -285,8 +325,8 @@ export function renderQuickBar(bookmarks, containerEl) {
   }
 }
 
-// Long-press & Drag Reordering for Favourites in Quick Bar
-function setupQuickPillReorder(pill, containerEl) {
+// Long-press & Drag Reordering for Favourites in Quick Bar & Horizontal Folders
+function setupQuickPillReorder(pill, containerEl, parentFolderId = rootBookmarkBarId) {
   let longPressTimer = null;
   let isDragging = false;
   let hasDragged = false;
@@ -347,7 +387,17 @@ function setupQuickPillReorder(pill, containerEl) {
       const newIndex = allPills.indexOf(pill);
 
       if (newIndex !== -1 && newIndex !== initialIndex) {
-        await moveBookmark(pill.dataset.id, rootBookmarkBarId, newIndex);
+        if (parentFolderId !== rootBookmarkBarId) {
+          const cardObj = cachedFolderCards.find(c => c.id === parentFolderId);
+          if (cardObj && cardObj.bookmarks) {
+            const bkmIndex = cardObj.bookmarks.findIndex(b => b.id === pill.dataset.id);
+            if (bkmIndex !== -1) {
+              const [moved] = cardObj.bookmarks.splice(bkmIndex, 1);
+              cardObj.bookmarks.splice(newIndex, 0, moved);
+            }
+          }
+        }
+        await moveBookmark(pill.dataset.id, parentFolderId, newIndex);
       }
 
       // Keep hasDragged true briefly so the following click event is swallowed
@@ -435,6 +485,7 @@ function findTargetSiblingPill(container, clientX, clientY, currentPill) {
 
 // Render Folder Cards Grid
 export function renderCardsGrid(cards, gridEl, onEmojiClick) {
+  cachedFolderCards = cards || [];
   gridEl.innerHTML = '';
   if (!cards || cards.length === 0) {
     gridEl.innerHTML = `
@@ -520,59 +571,10 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
     header.appendChild(meta);
     cardEl.appendChild(header);
 
-    // 2. Bookmarks List Body
+    // 2. Bookmarks List Body (Vertical or Horizontal based on Folder Mode)
     const body = document.createElement('div');
     body.className = 'card-body';
-
-    if (card.bookmarks.length === 0) {
-      body.innerHTML = `<div class="empty-card-state">Folder is empty. Right-click to add a bookmark.</div>`;
-    } else {
-      const inNewTab = shouldOpenInNewTab();
-      for (const bkm of card.bookmarks) {
-        const link = document.createElement('a');
-        link.className = 'bookmark-link';
-        link.href = bkm.url;
-        link.title = bkm.title || bkm.url;
-        link.dataset.id = bkm.id;
-        link.dataset.title = bkm.title || bkm.url;
-        link.dataset.url = bkm.url;
-        link.dataset.folderId = card.id;
-        link.dataset.isBookmarkItem = 'true';
-
-        if (inNewTab) {
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-        } else {
-          link.target = '_self';
-        }
-
-        const icon = createFaviconElement(bkm.url, bkm.title);
-        const span = document.createElement('span');
-        span.className = 'bookmark-title';
-        span.textContent = bkm.title || bkm.url;
-
-        // Bookmark Drag Handle on the right corner
-        const dragHandle = document.createElement('span');
-        dragHandle.className = 'bookmark-drag-handle';
-        dragHandle.title = 'Drag to reorder bookmark';
-        dragHandle.innerHTML = `
-          <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
-            <circle cx="9" cy="6" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="6" r="1.5" fill="currentColor"/>
-            <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
-            <circle cx="9" cy="18" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="18" r="1.5" fill="currentColor"/>
-          </svg>`;
-
-        link.appendChild(icon);
-        link.appendChild(span);
-        link.appendChild(dragHandle);
-        body.appendChild(link);
-
-        setupBookmarkDragDrop(link, dragHandle, body);
-      }
-    }
+    renderCardBody(card, cardEl, body);
 
     cardEl.appendChild(body);
 
@@ -581,6 +583,119 @@ export function renderCardsGrid(cards, gridEl, onEmojiClick) {
 
     gridEl.appendChild(cardEl);
   }
+}
+
+// Render Bookmarks inside Card Body (Handles Vertical vs Horizontal List modes)
+function renderCardBody(card, cardEl, body) {
+  body.innerHTML = '';
+
+  const config = getFolderModeConfig(card.id);
+  const isHorizontal = config.mode === 'horizontal';
+  const span = config.span || '2';
+
+  cardEl.classList.remove('folder-mode-horizontal', 'folder-span-1', 'folder-span-2', 'folder-span-3', 'folder-span-full');
+  if (isHorizontal) {
+    cardEl.classList.add('folder-mode-horizontal', `folder-span-${span}`);
+  }
+
+  if (card.bookmarks.length === 0) {
+    body.innerHTML = `<div class="empty-card-state">Folder is empty. Right-click to add a bookmark.</div>`;
+    return;
+  }
+
+  const inNewTab = shouldOpenInNewTab();
+
+  if (isHorizontal) {
+    // Mode: Horizontal List (horizontal wrapped favourite pills, draggable without drag handle)
+    for (const bkm of card.bookmarks) {
+      const link = document.createElement('a');
+      link.className = 'quick-pill folder-pill bookmark-link';
+      link.href = bkm.url;
+      link.title = bkm.title || bkm.url;
+      link.dataset.id = bkm.id;
+      link.dataset.title = bkm.title || bkm.url;
+      link.dataset.url = bkm.url;
+      link.dataset.folderId = card.id;
+      link.dataset.isBookmarkItem = 'true';
+      link.draggable = false;
+
+      if (inNewTab) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      } else {
+        link.target = '_self';
+      }
+
+      const icon = createFaviconElement(bkm.url, bkm.title);
+      const spanEl = document.createElement('span');
+      spanEl.textContent = bkm.title || bkm.url;
+
+      link.appendChild(icon);
+      link.appendChild(spanEl);
+      body.appendChild(link);
+
+      setupQuickPillReorder(link, body, card.id);
+    }
+  } else {
+    // Mode: Vertical List (standard vertical list with drag handle)
+    for (const bkm of card.bookmarks) {
+      const link = document.createElement('a');
+      link.className = 'bookmark-link';
+      link.href = bkm.url;
+      link.title = bkm.title || bkm.url;
+      link.dataset.id = bkm.id;
+      link.dataset.title = bkm.title || bkm.url;
+      link.dataset.url = bkm.url;
+      link.dataset.folderId = card.id;
+      link.dataset.isBookmarkItem = 'true';
+
+      if (inNewTab) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      } else {
+        link.target = '_self';
+      }
+
+      const icon = createFaviconElement(bkm.url, bkm.title);
+      const span = document.createElement('span');
+      span.className = 'bookmark-title';
+      span.textContent = bkm.title || bkm.url;
+
+      // Bookmark Drag Handle on the right corner
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'bookmark-drag-handle';
+      dragHandle.title = 'Drag to reorder bookmark';
+      dragHandle.innerHTML = `
+        <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+          <circle cx="9" cy="6" r="1.5" fill="currentColor"/>
+          <circle cx="15" cy="6" r="1.5" fill="currentColor"/>
+          <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+          <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+          <circle cx="9" cy="18" r="1.5" fill="currentColor"/>
+          <circle cx="15" cy="18" r="1.5" fill="currentColor"/>
+        </svg>`;
+
+      link.appendChild(icon);
+      link.appendChild(span);
+      link.appendChild(dragHandle);
+      body.appendChild(link);
+
+      setupBookmarkDragDrop(link, dragHandle, body);
+    }
+  }
+}
+
+// Update Folder Card Appearance Dynamically in Place
+export function updateFolderCardAppearance(folderId) {
+  const cardEl = document.querySelector(`.bookmark-card[data-folder-id="${folderId}"]`);
+  if (!cardEl) return;
+  const bodyEl = cardEl.querySelector('.card-body');
+  if (!bodyEl) return;
+
+  const card = cachedFolderCards.find(c => c.id === folderId);
+  if (!card) return;
+
+  renderCardBody(card, cardEl, bodyEl);
 }
 
 function createFaviconElement(url, title) {
@@ -680,8 +795,18 @@ function setupBookmarkDragDrop(link, dragHandle, cardBody) {
 
     const allLinks = Array.from(cardBody.querySelectorAll('.bookmark-link'));
     const newIndex = allLinks.indexOf(draggedBookmark);
+    const folderId = draggedBookmark.dataset.folderId;
 
-    await moveBookmark(draggedBookmark.dataset.id, draggedBookmark.dataset.folderId, newIndex);
+    const cardObj = cachedFolderCards.find(c => c.id === folderId);
+    if (cardObj && cardObj.bookmarks) {
+      const bkmIndex = cardObj.bookmarks.findIndex(b => b.id === draggedBookmark.dataset.id);
+      if (bkmIndex !== -1 && newIndex !== -1) {
+        const [moved] = cardObj.bookmarks.splice(bkmIndex, 1);
+        cardObj.bookmarks.splice(newIndex, 0, moved);
+      }
+    }
+
+    await moveBookmark(draggedBookmark.dataset.id, folderId, newIndex);
   });
 }
 

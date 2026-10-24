@@ -52,17 +52,21 @@
 - 📌 **Auto-Wrapping Quick Bar with Long-Press Reordering**:
   - Displays your favorite bookmarks from Chrome's *Bookmarks Bar* as pill buttons directly beneath the search bar, automatically wrapping across multiple rows.
   - **Long-Press & Drag**: Press and hold any favourite pill for ~200ms to lift it into drag mode and rearrange your favourites directly on the fly. The new order instantly syncs with Chrome's native bookmark hierarchy.
-- 📂 **Organized & Collapsible Folder Cards**:
-  - Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards with scrollable lists.
+- 📂 **Organized & Collapsible Folder Cards with Folder Modes**:
+  - Subfolders from Chrome's *Other Bookmarks* are organized into responsive 2 to 4 column cards.
+  - **Folder Modes (Vertical List vs Horizontal List)**: Switch any folder card individually between the classic vertical list and the new horizontal list mode directly via the folder's right-click context menu.
+  - **Custom Folder Widths**: In Horizontal List mode, configure each folder's card width to span **1 Column**, **2 Columns**, **3 Columns**, or the **Full Row**, with graceful responsive clamping on narrower screens.
+  - **Natural Height Expansion**: Horizontal folder cards expand naturally without height caps to display all bookmark pills cleanly without vertical scroll clipping.
+  - **Long-Press Drag Reordering**: Bookmarks inside horizontal folders can be reordered directly via tactile pointer drag (mirroring the top favourites bar) without requiring dedicated drag handles.
   - **Collapse & Expand**: Folders can be collapsed into compact headers via an interactive chevron button or right-click menu, with state saved across sessions.
-  - **Card Drag-and-Drop**: Easily reorder folder cards across your grid using the titlebar as a drag handle.
+  - **Card Drag-and-Drop**: Easily reorder folder cards across your grid using the card header as a drag handle.
   - **Custom Emojis**: Set custom single-emoji folder icons using the quick picker with strict 1-emoji Unicode validation (`Intl.Segmenter`).
 - ↕️ **In-Folder Drag-and-Drop Bookmark Reordering**:
-  - Reorder bookmarks directly within each folder card using a dedicated 6-dot drag handle on the right corner of each bookmark link.
+  - Reorder bookmarks directly within each folder card (using the 6-dot drag handle in vertical mode, or direct long-press drag in horizontal mode).
   - Features real-time drop position indicators and instantly syncs the new order with Chrome's native bookmark hierarchy via `chrome.bookmarks.move`.
 - 🖱️ **Full Browser Bookmark Management (Context Menu)**:
-  - Right-click anywhere on the background to create a new folder.
-  - Right-click a folder card to rename it, collapse/expand it, change its emoji, or add a bookmark inside.
+  - Right-click anywhere on the background to create a new folder or favourite.
+  - Right-click a folder card to switch **Folder Mode**, adjust **Folder Width** (in Horizontal mode), rename it, collapse/expand it, change its emoji, or add a bookmark inside. Toggling mode or selecting width keeps the menu open so you can configure everything in a single go!
   - Right-click any bookmark or quick-bar pill to edit its name or URL, copy URL, or delete it.
   - All changes sync bidirectionally in real-time with Chrome's native bookmark database.
 - 🔍 **Instant Bookmark Search, Interactive Suggestions & Custom Shortcuts**:

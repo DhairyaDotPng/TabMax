@@ -762,6 +762,50 @@ html[data-theme-style="m3e"] #custom-select-palette-dot {
   background-color: var(--md-sys-color-primary) !important;
 }
 
+/* Context Menu in M3E */
+html[data-theme-style="m3e"] .context-menu {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border-radius: var(--radius-2xl) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-shadow: var(--md-elevation-3) !important;
+}
+html[data-theme-style="m3e"] .context-menu-item {
+  border-radius: var(--radius-full) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .context-menu-item:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .context-width-pill {
+  border-radius: var(--radius-full) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+html[data-theme-style="m3e"] .context-width-pill:hover {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+html[data-theme-style="m3e"] .context-width-pill.active {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+html[data-theme-style="m3e"] .folder-pill,
+html[data-theme-style="m3e"] .bookmark-card.folder-mode-horizontal .bookmark-link {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-radius: var(--radius-full) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-shadow: none !important;
+}
+html[data-theme-style="m3e"] .folder-pill:hover,
+html[data-theme-style="m3e"] .bookmark-card.folder-mode-horizontal .bookmark-link:hover {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+
 /* Primary & Secondary Buttons */
 html[data-theme-style="m3e"] .btn-primary {
   background-color: var(--md-sys-color-primary) !important;
@@ -1848,6 +1892,65 @@ html[data-theme-style="neo"] .theme-menu-title {
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
   color: var(--neo-text) !important;
+}
+
+/* Context Menu in Neo */
+html[data-theme-style="neo"] .context-menu {
+  background-color: var(--neo-card-bg) !important;
+  border: 3px solid var(--neo-border-color) !important;
+  box-shadow: 6px 6px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+}
+html[data-theme-style="neo"] .context-menu-item {
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+  color: var(--neo-text) !important;
+}
+html[data-theme-style="neo"] .context-menu-item:hover {
+  background-color: var(--neo-accent-light) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .context-menu-item.destructive {
+  color: hsl(var(--destructive)) !important;
+}
+html[data-theme-style="neo"] .context-menu-item.destructive:hover {
+  background-color: hsl(var(--destructive)) !important;
+  color: #FFFFFF !important;
+}
+html[data-theme-style="neo"] .context-width-pill {
+  background-color: var(--neo-card-bg) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+  color: var(--neo-text) !important;
+  font-weight: 700 !important;
+}
+html[data-theme-style="neo"] .context-width-pill:hover {
+  background-color: var(--neo-accent-light) !important;
+  color: #000000 !important;
+}
+html[data-theme-style="neo"] .context-width-pill.active {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0 0 var(--neo-shadow-color) !important;
+}
+html[data-theme-style="neo"] .folder-pill,
+html[data-theme-style="neo"] .bookmark-card.folder-mode-horizontal .bookmark-link {
+  background-color: var(--neo-accent-light) !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2.5px 2.5px 0 0 var(--neo-shadow-color) !important;
+  border-radius: 0 !important;
+  color: var(--neo-text) !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  padding: 0.35rem 0.75rem !important;
+  margin-bottom: 0 !important;
+}
+html[data-theme-style="neo"] .folder-pill:hover,
+html[data-theme-style="neo"] .bookmark-card.folder-mode-horizontal .bookmark-link:hover {
+  background-color: var(--neo-accent) !important;
+  color: #000000 !important;
+  box-shadow: 4px 4px 0 0 var(--neo-shadow-color) !important;
 }
 
 /* --------------------------------------------------------------------------
